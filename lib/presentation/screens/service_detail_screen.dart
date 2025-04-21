@@ -5,16 +5,16 @@ import 'package:regina_app/domain/service.dart';
 class ServiceDetailScreen extends StatelessWidget {
   ServiceDetailScreen({super.key, required this.serviceId});
 
-  final String serviceId;
-  final List<Service> services = serviceRepository;
+  String serviceId;
+  List<Service> services = serviceRepository;
 
   @override
   Widget build(BuildContext context) {
-    final service = services.firstWhere((s) => s.id == serviceId);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del servicio')),
-      body: _ServiceDetailView(service: service),
+      body: _ServiceDetailView(
+        service: services.firstWhere((service) => service.id == serviceId),
+      ),
     );
   }
 }
