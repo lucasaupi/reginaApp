@@ -1,16 +1,22 @@
-# regina_app
+# Regina App
 
-A new Flutter project.
+Una app móvil hecha en Flutter para mostrar productos y servicios, y pedir turnos online.
 
-## Getting Started
+## Funcionalidades actuales
 
-This project is a starting point for a Flutter application.
+- Vista de productos y servicios
+- Navegación con `go_router`
+- Home con scroll horizontal de cards
+- Pantalla de detalle para productos y servicios
 
-A few resources to get you started if this is your first Flutter project:
+## Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter
+- go_router
+- Firebase (en camino)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Setup
+
+```bash
+flutter pub get
+flutter run
