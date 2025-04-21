@@ -12,7 +12,7 @@ class ProductDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return  Scaffold(
       appBar: AppBar(
-        title: Text('Detalle del producto'),
+        title: const Text('Detalle del producto'),
       ),
       body: _ProductDetailView(
         product: products.firstWhere((product) => product.id == productId),
