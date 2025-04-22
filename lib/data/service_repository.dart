@@ -11,10 +11,9 @@ final List<Service> serviceRepository = [
     imageUrl:
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBQnsgvxA0Ogc333pmhJZ7VvTmgAKHT0JRWA&s',
     availableSlots: [
-      'Lunes 10:00',
-      'Lunes 15:00',
-      'Miércoles 11:00',
-      'Viernes 14:00',
+      DateTime(2024, 4, 26, 13, 0),
+      DateTime(2024, 4, 26, 14, 0),
+      DateTime(2024, 4, 27, 12, 0),
     ],
   ),
   Service(
@@ -25,7 +24,11 @@ final List<Service> serviceRepository = [
     description: 'Masaje terapéutico para aliviar tensiones musculares.',
     imageUrl:
         'https://cdn0.uncomo.com/es/posts/7/9/5/como_es_el_masaje_balines_41597_600.jpg',
-    availableSlots: ['Martes 09:00', 'Jueves 13:00', 'Viernes 16:00'],
+    availableSlots: [
+      DateTime(2024, 4, 25, 10),
+      DateTime(2024, 4, 25, 14),
+      DateTime(2024, 4, 26, 11),
+    ],
   ),
   Service(
     id: '3',
@@ -35,6 +38,9 @@ final List<Service> serviceRepository = [
     description: 'Esmaltado profesional y cuidado de uñas.',
     imageUrl:
         'https://hips.hearstapps.com/hmg-prod/images/unas-bb-cream-67bdfe72d0d58.jpg?resize=980:*',
-    availableSlots: ['Lunes 17:00', 'Miércoles 09:00', 'Sábado 10:00'],
+    availableSlots: [
+      DateTime(2024, 4, 26, 9),
+      DateTime(2024, 4, 27, 15),
+    ],
   ),
 ];
