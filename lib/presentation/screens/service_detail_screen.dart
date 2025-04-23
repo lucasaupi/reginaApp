@@ -28,12 +28,11 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   }
 
   List<DateTime> _slotsForSelectedDay() {
-  if (_selectedDay == null || service.availableSlots == null) return [];
-  return service.availableSlots!
-      .where((slot) => isSameDay(slot, _selectedDay))
-      .toList();
-}
-
+    if (_selectedDay == null || service.availableSlots == null) return [];
+    return service.availableSlots!
+        .where((slot) => isSameDay(slot, _selectedDay))
+        .toList();
+  }
 
   void _confirmarReserva() {
     if (_selectedSlot == null) return;
@@ -43,16 +42,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Reserva confirmada'),
-        content: Text('Turno reservado para el $fecha a las $hora.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Aceptar'),
-          )
-        ],
-      ),
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Reserva confirmada'),
+            content: Text('Turno reservado para el $fecha a las $hora.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Aceptar'),
+              ),
+            ],
+          ),
     );
   }
 
@@ -79,12 +79,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
             // CALENDARIO
             TableCalendar(
+              locale: 'es',
               focusedDay: _focusedDay,
               firstDay: DateTime.now(),
               lastDay: DateTime.now().add(const Duration(days: 30)),
               calendarFormat: CalendarFormat.week,
-              selectedDayPredicate: (day) =>
-                  _selectedDay != null && isSameDay(day, _selectedDay),
+              selectedDayPredicate:
+                  (day) => _selectedDay != null && isSameDay(day, _selectedDay),
               onDaySelected: (selected, focused) {
                 setState(() {
                   _selectedDay = selected;
@@ -92,33 +93,46 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   _selectedSlot = null;
                 });
               },
+              headerVisible: true,
+              headerStyle: HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+              ),
             ),
 
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Horarios disponibles:', style: textTheme.titleMedium),
+              child: Text(
+                'Horarios disponibles:',
+                style: textTheme.titleMedium,
+              ),
             ),
             const SizedBox(height: 8),
 
             if (slotsDelDia.isEmpty)
               const Text('No hay turnos disponibles para este día.')
             else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: slotsDelDia.map((slot) {
-                  final hora = DateFormat('HH:mm').format(slot);
-                  return ChoiceChip(
-                    label: Text(hora),
-                    selected: _selectedSlot == slot,
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedSlot = slot;
-                      });
-                    },
-                  );
-                }).toList(),
+              SizedBox(
+                height: 40,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: slotsDelDia.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final slot = slotsDelDia[index];
+                    final hora = DateFormat('HH:mm').format(slot);
+                    return ChoiceChip(
+                      label: Text(hora),
+                      selected: _selectedSlot == slot,
+                      onSelected: (_) {
+                        setState(() {
+                          _selectedSlot = slot;
+                        });
+                      },
+                    );
+                  },
+                ),
               ),
 
             const Spacer(),
@@ -129,7 +143,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
-            )
+            ),
           ],
         ),
       ),
