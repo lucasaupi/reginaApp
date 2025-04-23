@@ -5,7 +5,7 @@ class Service {
   String times;
   String description;
   String? imageUrl;
-  List<String>? availableSlots;
+  List<DateTime>? availableSlots;
 
   Service({
     required this.id,
