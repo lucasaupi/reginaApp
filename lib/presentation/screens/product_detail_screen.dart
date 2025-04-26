@@ -10,22 +10,17 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalle del producto'),
-      ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Detalle del producto')),
       body: _ProductDetailView(
         product: products.firstWhere((product) => product.id == productId),
-        ),
+      ),
     );
   }
 }
 
 class _ProductDetailView extends StatelessWidget {
-  const _ProductDetailView({
-    super.key,
-    required this.product,
-  });
+  const _ProductDetailView({super.key, required this.product});
 
   final Product product;
 
@@ -38,11 +33,8 @@ class _ProductDetailView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (product.imageUrl != null)
-            Image.network(
-              product.imageUrl!,
-              height: 400,
-            ),
-            const SizedBox(height: 16),
+            Image.network(product.imageUrl!, height: 400),
+          const SizedBox(height: 16),
           Text(product.name, style: textStyle.titleLarge),
           Text(product.description, style: textStyle.bodyLarge),
           Text(product.price.toString()),
