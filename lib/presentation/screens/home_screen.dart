@@ -19,8 +19,12 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           children: [
             Text('Que tengas un hermoso día ✨', style: textTheme.headlineSmall),
+            Image.asset(
+              'assets/images/regina_app_logo.png',
+              width: 200,
+              height: 200,
+            ),
             const SizedBox(height: 20),
-
             _SectionHeader(
               title: 'Productos',
               onTap: () => context.push('/products'),
