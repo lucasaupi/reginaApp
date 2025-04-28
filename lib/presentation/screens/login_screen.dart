@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regina_app/presentation/screens/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -51,6 +52,23 @@ class LoginScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () => _login(context, 'lucas@ort.com', 'lucas1234'),
               child: const Text("Iniciar sesión"),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("¿No tenés cuenta?"),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text("Crear cuenta"),
+                ),
+              ],
             ),
           ],
         ),
