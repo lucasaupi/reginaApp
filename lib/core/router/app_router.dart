@@ -4,6 +4,7 @@ import 'package:regina_app/presentation/screens/product_detail_screen.dart';
 import 'package:regina_app/presentation/screens/product_screen.dart';
 import 'package:regina_app/presentation/screens/service_detail_screen.dart';
 import 'package:regina_app/presentation/screens/services_screen.dart';
+import 'package:regina_app/presentation/screens/login_screen.dart';
 import 'package:regina_app/presentation/widgets/main_scaffold.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -40,10 +41,15 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/service_detail/:serviceId',
           name: 'service_detail',
-          builder: 
-            (context, state) => ServiceDetailScreen(
-              serviceId: state.pathParameters['serviceId']!,
-          ),
+          builder:
+              (context, state) => ServiceDetailScreen(
+                serviceId: state.pathParameters['serviceId']!,
+              ),
+        ),
+        GoRoute(
+          path: '/login',
+          name: 'login',
+          builder: (context, state) => LoginScreen(),
         ),
       ],
     ),
