@@ -31,6 +31,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.3
+  cloud_firestore: ^4.15.3
   flutter_localizations:
     sdk: flutter
   go_router: ^15.0.0
