@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "3988655373",
+    "project_id": "regina-app-d47ce",
+    "storage_bucket": "regina-app-d47ce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:3988655373:android:105b44366be496fa5e3444",
+        "android_client_info": {
+          "package_name": "com.example.regina_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPFIlPSJUtTe0ku93QJsNpF43nEyS1Pko"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

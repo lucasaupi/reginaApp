@@ -1,10 +1,1 @@
-{
-  "emulators": {
-    "dataconnect": {
-      "dataDir": "dataconnect/.dataconnect/pgliteData"
-    }
-  },
-  "dataconnect": {
-    "source": "dataconnect"
-  }
-}
+{"emulators":{"dataconnect":{"dataDir":"dataconnect/.dataconnect/pgliteData"}},"dataconnect":{"source":"dataconnect"},"flutter":{"platforms":{"android":{"default":{"projectId":"regina-app-d47ce","appId":"1:3988655373:android:105b44366be496fa5e3444","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"regina-app-d47ce","configurations":{"android":"1:3988655373:android:105b44366be496fa5e3444","ios":"1:3988655373:ios:852e30313b62e66d5e3444","macos":"1:3988655373:ios:852e30313b62e66d5e3444","web":"1:3988655373:web:b1e11ada9b3b7f165e3444","windows":"1:3988655373:web:c5efa6c540b591f45e3444"}}}}}}

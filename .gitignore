@@ -17,9 +17,6 @@ app.*.map.json
 # Generated plugin registrant (web)
 web/generated_plugin_registrant.dart
 
-# Firebase (opcional, según si lo usás)
-firebase_options.dart
-
 # --------------------------------------
 # iOS
 ios/.symlinks/
@@ -68,3 +65,8 @@ build/web/
 .svn/
 .swiftpm/
 migrate_working_dir/
+
+# Firebase
+firebase-tools-instant-win.exe
+.firebase/
+firebase-debug.log
