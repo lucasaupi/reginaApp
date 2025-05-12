@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:regina_app/data/product_repository.dart';
-import 'package:regina_app/data/service_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/domain/service.dart';
+import 'package:regina_app/presentation/providers/product_provider.dart';
+import 'package:regina_app/presentation/providers/service_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final products = ref.watch(productProvider);
+    final services = ref.watch(serviceProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Regina App'), centerTitle: true),
@@ -30,7 +33,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () => context.push('/products'),
             ),
             const SizedBox(height: 8),
-            _HorizontalProductList(),
+            _HorizontalProductList(products: products),
 
             const SizedBox(height: 20),
 
@@ -39,7 +42,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () => context.push('/services'),
             ),
             const SizedBox(height: 8),
-            _HorizontalServiceList(),
+            _HorizontalServiceList(services: services),
           ],
         ),
       ),
@@ -73,9 +76,9 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _HorizontalProductList extends StatelessWidget {
-  final List<Product> products = productRepository;
+  final List<Product> products;
 
-  _HorizontalProductList({super.key});
+  const _HorizontalProductList({super.key, required this.products});
 
   @override
   Widget build(BuildContext context) {
@@ -98,9 +101,9 @@ class _HorizontalProductList extends StatelessWidget {
 }
 
 class _HorizontalServiceList extends StatelessWidget {
-  final List<Service> services = serviceRepository;
+  final List<Service> services;
 
-  _HorizontalServiceList({super.key});
+  const _HorizontalServiceList({super.key, required this.services});
 
   @override
   Widget build(BuildContext context) {
@@ -139,18 +142,17 @@ class _SquareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child:
-                  imageUrl != null
-                      ? ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
-                        ),
-                        child: Image.network(imageUrl!, fit: BoxFit.cover),
-                      )
-                      : Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported, size: 40),
+              child: imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
                       ),
+                      child: Image.network(imageUrl!, fit: BoxFit.cover),
+                    )
+                  : Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported, size: 40),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
