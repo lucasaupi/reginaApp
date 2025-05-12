@@ -1,37 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:regina_app/data/service_repository.dart';
 import 'package:regina_app/domain/service.dart';
+import 'package:regina_app/presentation/providers/service_provider.dart';
+import 'package:regina_app/presentation/providers/slots_provider.dart';
 
-class ServiceDetailScreen extends StatefulWidget {
+class ServiceDetailScreen extends ConsumerStatefulWidget {
   final String serviceId;
 
   const ServiceDetailScreen({super.key, required this.serviceId});
 
   @override
-  State<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
+  ConsumerState<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
 }
 
-class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
-  late final Service service;
-  late DateTime _focusedDay;
+class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
+  DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   DateTime? _selectedSlot;
 
   @override
   void initState() {
     super.initState();
-    service = serviceRepository.firstWhere((s) => s.id == widget.serviceId);
-    _focusedDay = DateTime.now();
     _selectedDay = _focusedDay;
   }
 
-  List<DateTime> _slotsForSelectedDay() {
-    if (_selectedDay == null || service.availableSlots == null) return [];
-    return service.availableSlots!
-        .where((slot) => isSameDay(slot, _selectedDay))
-        .toList();
+  List<DateTime> _slotsForSelectedDay(List<DateTime> allSlots) {
+    if (_selectedDay == null) return [];
+    return allSlots.where((slot) => isSameDay(slot, _selectedDay)).toList();
   }
 
   void _confirmarReserva() {
@@ -42,24 +40,25 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
     showDialog(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Reserva confirmada'),
-            content: Text('Turno reservado para el $fecha a las $hora.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Aceptar'),
-              ),
-            ],
+      builder: (_) => AlertDialog(
+        title: const Text('Reserva confirmada'),
+        content: Text('Turno reservado para el $fecha a las $hora.'),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text('Aceptar'),
           ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final slotsDelDia = _slotsForSelectedDay();
+    final services = ref.watch(serviceProvider);
+    final service = services.firstWhere((s) => s.id == widget.serviceId);
+    final slotsAsync = ref.watch(slotsProvider(service.id));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del servicio')),
@@ -84,8 +83,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               firstDay: DateTime.now(),
               lastDay: DateTime.now().add(const Duration(days: 30)),
               calendarFormat: CalendarFormat.week,
-              selectedDayPredicate:
-                  (day) => _selectedDay != null && isSameDay(day, _selectedDay),
+              selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
               onDaySelected: (selected, focused) {
                 setState(() {
                   _selectedDay = selected;
@@ -94,7 +92,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 });
               },
               headerVisible: true,
-              headerStyle: HeaderStyle(
+              headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
                 titleCentered: true,
               ),
@@ -103,37 +101,43 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Horarios disponibles:',
-                style: textTheme.titleMedium,
-              ),
+              child: Text('Horarios disponibles:', style: textTheme.titleMedium),
             ),
             const SizedBox(height: 8),
 
-            if (slotsDelDia.isEmpty)
-              const Text('No hay turnos disponibles para este día.')
-            else
-              SizedBox(
-                height: 40,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: slotsDelDia.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final slot = slotsDelDia[index];
-                    final hora = DateFormat('HH:mm').format(slot);
-                    return ChoiceChip(
-                      label: Text(hora),
-                      selected: _selectedSlot == slot,
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedSlot = slot;
-                        });
+            slotsAsync.when(
+              loading: () => const CircularProgressIndicator(),
+              error: (e, _) => Text('Error cargando turnos: $e'),
+              data: (slots) {
+                final slotsDelDia = _slotsForSelectedDay(slots);
+
+                if (slotsDelDia.isEmpty) {
+                  return const Text('No hay turnos disponibles para este día.');
+                } else {
+                  return SizedBox(
+                    height: 40,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: slotsDelDia.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final slot = slotsDelDia[index];
+                        final hora = DateFormat('HH:mm').format(slot);
+                        return ChoiceChip(
+                          label: Text(hora),
+                          selected: _selectedSlot == slot,
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedSlot = slot;
+                            });
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              ),
+                    ),
+                  );
+                }
+              },
+            ),
 
             const Spacer(),
             ElevatedButton.icon(
