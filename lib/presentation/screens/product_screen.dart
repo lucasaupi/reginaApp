@@ -11,7 +11,7 @@ class ProductScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(productProvider);
 
-    Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
+   // Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
 
     return Scaffold(
       appBar: AppBar(title: Text('Productos')),
