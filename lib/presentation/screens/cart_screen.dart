@@ -26,45 +26,75 @@ class CartScreen extends ConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: cartGrouped.isEmpty
-                ? const Center(child: Text('Tu carrito está vacío.'))
-                : ListView.builder(
-                    itemCount: cartGrouped.length,
-                    itemBuilder: (context, index) {
-                      final product = cartGrouped.keys.elementAt(index);
-                      final quantity = cartGrouped[product]!;
+            child:
+                cartGrouped.isEmpty
+                    ? const Center(child: Text('Tu carrito está vacío.'))
+                    : ListView.builder(
+                      itemCount: cartGrouped.length,
+                      itemBuilder: (context, index) {
+                        final product = cartGrouped.keys.elementAt(index);
+                        final quantity = cartGrouped[product]!;
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          leading: product.imageUrl != null
-                              ? Image.network(product.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
-                              : const Icon(Icons.image_not_supported, size: 50),
-                          title: Text(product.name),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Precio: \$${product.price.toStringAsFixed(2)}'),
-                              const SizedBox(height: 4),
-                              Text('Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}'),
-                            ],
+                        return Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Cantidad: $quantity'),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () {
-                                  cartNotifier.removeAllOf(product);
-                                },
+                          child: ListTile(
+                            leading:
+                                product.imageUrl != null
+                                    ? Image.network(
+                                      product.imageUrl!,
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    )
+                                    : const Icon(
+                                      Icons.image_not_supported,
+                                      size: 50,
+                                    ),
+                            title: Text(product.name),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Precio: \$${product.price.toStringAsFixed(2)}',
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}',
+                                ),
+                              ],
+                            ),
+                            trailing: SizedBox(
+                              height: 60, // ajustá según tu gusto
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Cantidad: $quantity',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    iconSize: 20, // opcional: más chico
+                                    padding:
+                                        EdgeInsets
+                                            .zero, // elimina padding innecesario
+                                    constraints:
+                                        const BoxConstraints(), // elimina restricciones extra
+                                    onPressed: () {
+                                      cartNotifier.removeAllOf(product);
+                                    },
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
 
           // RESUMEN DEL PEDIDO
@@ -77,8 +107,17 @@ class CartScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Total:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
+                    const Text(
+                      'Total:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '\$${total.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
