@@ -44,6 +44,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         .register(
           _emailController.text.trim(),
           _passwordController.text.trim(),
+          _firstNameController.text.trim(),
+          _lastNameController.text.trim(),
         );
 
     final state = ref.read(authControllerProvider);
