@@ -13,6 +13,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _register() async {
@@ -73,6 +75,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: ListView(
             shrinkWrap: true,
             children: [
+              TextFormField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator:
+                    (val) =>
+                        val == null || val.isEmpty ? 'Ingrese su nombre' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(labelText: 'Apellido'),
+                validator:
+                    (val) =>
+                        val == null || val.isEmpty
+                            ? 'Ingrese su apellido'
+                            : null,
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
