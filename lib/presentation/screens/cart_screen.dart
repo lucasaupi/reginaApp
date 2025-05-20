@@ -10,16 +10,10 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
+    
 
-    final cartGrouped = <Product, int>{};
-
-    for (var product in cart) {
-      cartGrouped[product] = (cartGrouped[product] ?? 0) + 1;
-    }
-
-    final total = cartGrouped.entries
-        .map((e) => e.key.price * e.value)
-        .fold<double>(0, (a, b) => a + b);
+    
+    final total = ref.watch(cartProvider.notifier).total;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Carrito')),
@@ -27,72 +21,19 @@ class CartScreen extends ConsumerWidget {
         children: [
           Expanded(
             child:
-                cartGrouped.isEmpty
+                cart.isEmpty
                     ? const Center(child: Text('Tu carrito está vacío.'))
                     : ListView.builder(
-                      itemCount: cartGrouped.length,
+                      itemCount: cart.length,
                       itemBuilder: (context, index) {
-                        final product = cartGrouped.keys.elementAt(index);
-                        final quantity = cartGrouped[product]!;
+                          final item = cart[index];
+                        final product = item.product;
+                        final quantity = item.quantity;
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: ListTile(
-                            leading:
-                                product.imageUrl != null
-                                    ? Image.network(
-                                      product.imageUrl!,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    )
-                                    : const Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
-                                    ),
-                            title: Text(product.name),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Precio: \$${product.price.toStringAsFixed(2)}',
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}',
-                                ),
-                              ],
-                            ),
-                            trailing: SizedBox(
-                              height: 60, // ajustá según tu gusto
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Cantidad: $quantity',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline),
-                                    iconSize: 20, // opcional: más chico
-                                    padding:
-                                        EdgeInsets
-                                            .zero, // elimina padding innecesario
-                                    constraints:
-                                        const BoxConstraints(), // elimina restricciones extra
-                                    onPressed: () {
-                                      cartNotifier.removeAllOf(product);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
+                        return item_cart_card(product: product,
+                         quantity: quantity,
+                          cartNotifier: cartNotifier
+                          );
                       },
                     ),
           ),
@@ -138,6 +79,87 @@ class CartScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class item_cart_card extends StatelessWidget {
+  const item_cart_card({
+    super.key,
+    required this.product,
+    required this.quantity,
+    required this.cartNotifier,
+  });
+
+  final Product product;
+  final int quantity;
+  final CartNotifier cartNotifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 8,
+      ),
+      child: ListTile(
+        leading:
+            product.imageUrl != null
+                ? Image.network(
+                  product.imageUrl!,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                )
+                : const Icon(
+                  Icons.image_not_supported,
+                  size: 50,
+                ),
+        title: Text(product.name),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Precio: \$${product.price.toStringAsFixed(2)}',
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}',
+            ),
+          ],
+        ),
+        trailing: SizedBox(
+          height: 60, // ajustá según tu gusto
+          child: Column(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
+            children: [
+              
+              Text(
+                'Cantidad: $quantity',
+                style: const TextStyle(fontSize: 12),
+              ),
+              IconButton(
+              icon: Icon(Icons.remove),
+              onPressed: () {
+                cartNotifier.removeOneFromCart(product);}
+            ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                iconSize: 20, // opcional: más chico
+                padding:
+                    EdgeInsets
+                        .zero, // elimina padding innecesario
+                constraints:
+                    const BoxConstraints(), // elimina restricciones extra
+                onPressed: () {
+                  cartNotifier.removeAllOf(product);
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
