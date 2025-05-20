@@ -5,7 +5,7 @@ import 'package:regina_app/domain/product.dart';
 class CartNotifier extends StateNotifier<List<CartItem>> {
   CartNotifier() : super([]);
 
-  // Agregar producto al carrito
+  
   void addToCart(Product product, {int quantity = 1}) {
     final index = state.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
@@ -18,6 +18,8 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
       state = [...state, CartItem(product: product, quantity: quantity)];
     }
   }
+
+
 
   void removeOneFromCart(Product product) {
      final index = state.indexWhere((item) => item.product.id == product.id);
@@ -35,12 +37,12 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
   }
    
 
-  // Eliminar completamente un producto (todas sus unidades)
+  
  void removeAllOf(Product product) {
   state = state.where((item) => item.product.id != product.id).toList();
 }
 
-  // Vaciar el carrito completamente
+  
   void clearCart() {
     state = [];
   }

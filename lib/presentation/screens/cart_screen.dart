@@ -30,7 +30,7 @@ class CartScreen extends ConsumerWidget {
                         final product = item.product;
                         final quantity = item.quantity;
 
-                        return item_cart_card(product: product,
+                        return itemCartCard(product: product,
                          quantity: quantity,
                           cartNotifier: cartNotifier
                           );
@@ -38,7 +38,7 @@ class CartScreen extends ConsumerWidget {
                     ),
           ),
 
-          // RESUMEN DEL PEDIDO
+          
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
             child: Column(
@@ -84,8 +84,8 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-class item_cart_card extends StatelessWidget {
-  const item_cart_card({
+class itemCartCard extends StatelessWidget {
+  const itemCartCard({
     super.key,
     required this.product,
     required this.quantity,
@@ -97,65 +97,91 @@ class item_cart_card extends StatelessWidget {
   final CartNotifier cartNotifier;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
-      child: ListTile(
-        leading:
-            product.imageUrl != null
-                ? Image.network(
-                  product.imageUrl!,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                )
-                : const Icon(
-                  Icons.image_not_supported,
-                  size: 50,
-                ),
-        title: Text(product.name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Precio: \$${product.price.toStringAsFixed(2)}',
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}',
-            ),
-          ],
-        ),
-        trailing: SizedBox(
-          height: 60, // ajustá según tu gusto
-          child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween,
+  
+   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+            
+              product.imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        product.imageUrl!,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const Icon(Icons.image_not_supported, size: 60),
+
+              const SizedBox(width: 12),
+
               
-              Text(
-                'Cantidad: $quantity',
-                style: const TextStyle(fontSize: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('Precio: \$${product.price.toStringAsFixed(2)}'),
+                    Text('Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}'),
+                  ],
+                ),
               ),
-              IconButton(
-              icon: Icon(Icons.remove),
-              onPressed: () {
-                cartNotifier.removeOneFromCart(product);}
-            ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                iconSize: 20, // opcional: más chico
-                padding:
-                    EdgeInsets
-                        .zero, // elimina padding innecesario
-                constraints:
-                    const BoxConstraints(), // elimina restricciones extra
-                onPressed: () {
-                  cartNotifier.removeAllOf(product);
-                },
+
+              
+              Column(
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          cartNotifier.removeOneFromCart(product);
+                        },
+                      ),
+                      Text('$quantity'),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          cartNotifier.addToCart(product, quantity: 1);
+                        },
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Eliminar producto'),
+                          content: Text('¿Querés eliminar "${product.name}" del carrito?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Eliminar'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        cartNotifier.removeAllOf(product);
+                      }
+                    },
+                  ),
+                ],
               ),
             ],
           ),
