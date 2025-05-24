@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/presentation/providers/product_provider.dart';
-import 'package:regina_app/presentation/providers/cart_provider.dart'; // <-- nuevo
+import 'package:regina_app/presentation/providers/cart_provider.dart';
+import 'package:regina_app/presentation/widgets/cart_icon_button.dart'; // <-- nuevo
 
 class ProductScreen extends ConsumerWidget {
   ProductScreen({super.key});
@@ -11,36 +12,16 @@ class ProductScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(productProvider);
-    final cart = ref.watch(cartProvider); // <-- nuevo
+    final cart = ref.watch(cartProvider); 
+    final totalItems = ref.watch(cartProvider.notifier).totalItems;// <-- nuevo
 
-    Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
+   // Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos'),
         actions: [
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () => context.push('/cart'), // <-- nueva ruta
-              ),
-              if (cart.isNotEmpty)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: CircleAvatar(
-                    radius: 10,
-                    backgroundColor: Colors.red,
-                    child: Text(
-                      '${cart.length}',
-                      style: const TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+         CartIconButton(),
         ],
       ),
       body: products.isEmpty

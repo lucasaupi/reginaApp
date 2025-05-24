@@ -10,16 +10,10 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
+    
 
-    final cartGrouped = <Product, int>{};
-
-    for (var product in cart) {
-      cartGrouped[product] = (cartGrouped[product] ?? 0) + 1;
-    }
-
-    final total = cartGrouped.entries
-        .map((e) => e.key.price * e.value)
-        .fold<double>(0, (a, b) => a + b);
+    
+    final total = ref.watch(cartProvider.notifier).total;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Carrito')),
@@ -27,77 +21,24 @@ class CartScreen extends ConsumerWidget {
         children: [
           Expanded(
             child:
-                cartGrouped.isEmpty
+                cart.isEmpty
                     ? const Center(child: Text('Tu carrito está vacío.'))
                     : ListView.builder(
-                      itemCount: cartGrouped.length,
+                      itemCount: cart.length,
                       itemBuilder: (context, index) {
-                        final product = cartGrouped.keys.elementAt(index);
-                        final quantity = cartGrouped[product]!;
+                          final item = cart[index];
+                        final product = item.product;
+                        final quantity = item.quantity;
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: ListTile(
-                            leading:
-                                product.imageUrl != null
-                                    ? Image.network(
-                                      product.imageUrl!,
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    )
-                                    : const Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
-                                    ),
-                            title: Text(product.name),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Precio: \$${product.price.toStringAsFixed(2)}',
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}',
-                                ),
-                              ],
-                            ),
-                            trailing: SizedBox(
-                              height: 60, // ajustá según tu gusto
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Cantidad: $quantity',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline),
-                                    iconSize: 20, // opcional: más chico
-                                    padding:
-                                        EdgeInsets
-                                            .zero, // elimina padding innecesario
-                                    constraints:
-                                        const BoxConstraints(), // elimina restricciones extra
-                                    onPressed: () {
-                                      cartNotifier.removeAllOf(product);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
+                        return itemCartCard(product: product,
+                         quantity: quantity,
+                          cartNotifier: cartNotifier
+                          );
                       },
                     ),
           ),
 
-          // RESUMEN DEL PEDIDO
+          
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
             child: Column(
@@ -138,6 +79,113 @@ class CartScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class itemCartCard extends StatelessWidget {
+  const itemCartCard({
+    super.key,
+    required this.product,
+    required this.quantity,
+    required this.cartNotifier,
+  });
+
+  final Product product;
+  final int quantity;
+  final CartNotifier cartNotifier;
+
+  @override
+  
+   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+            
+              product.imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        product.imageUrl!,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : const Icon(Icons.image_not_supported, size: 60),
+
+              const SizedBox(width: 12),
+
+              
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('Precio: \$${product.price.toStringAsFixed(2)}'),
+                    Text('Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}'),
+                  ],
+                ),
+              ),
+
+              
+              Column(
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          cartNotifier.removeOneFromCart(product);
+                        },
+                      ),
+                      Text('$quantity'),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          cartNotifier.addToCart(product, quantity: 1);
+                        },
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Eliminar producto'),
+                          content: Text('¿Querés eliminar "${product.name}" del carrito?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Eliminar'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true) {
+                        cartNotifier.removeAllOf(product);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

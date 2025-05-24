@@ -5,18 +5,26 @@ import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/domain/service.dart';
 import 'package:regina_app/presentation/providers/product_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
+import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
+    Future.microtask(() => ref.read(serviceProvider.notifier).getAllServices());
     final textTheme = Theme.of(context).textTheme;
     final products = ref.watch(productProvider);
     final services = ref.watch(serviceProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Regina App'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Regina App'),
+        actions: [
+          CartIconButton(),
+          ],
+       centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
@@ -43,6 +51,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _HorizontalServiceList(services: services),
+            
           ],
         ),
       ),
