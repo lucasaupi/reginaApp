@@ -28,7 +28,7 @@ class _PasswordRecoveryScreenState
       const SnackBar(content: Text('Email de recuperación enviado')),
     );
 
-    Navigator.pop(context); // Volver atrás después de enviar
+    Navigator.pop(context);
   }
 
   @override
