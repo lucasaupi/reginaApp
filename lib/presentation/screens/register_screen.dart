@@ -58,9 +58,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
       Navigator.pop(currentContext);
     } else {
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(state.error?.toString() ?? 'Error desconocido')),
-      );
+      final errorMsg = state.error?.toString();
+
+      String finalMessage = 'Error desconocido';
+
+      if (errorMsg != null && errorMsg.contains('correo ya está registrado')) {
+        finalMessage = 'El correo ingresado ya está registrado';
+      } else if (errorMsg != null) {
+        finalMessage = errorMsg;
+      }
+
+      ScaffoldMessenger.of(
+        currentContext,
+      ).showSnackBar(SnackBar(content: Text(finalMessage)));
     }
   }
 
