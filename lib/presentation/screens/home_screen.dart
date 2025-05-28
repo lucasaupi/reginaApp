@@ -20,7 +20,6 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Regina App'),
         actions: [
           CartIconButton(),
           ],
@@ -29,7 +28,7 @@ class HomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            Text('Que tengas un hermoso día ✨', style: textTheme.headlineSmall),
+            Text('Que tengas un hermoso día ✨', style: textTheme.headlineSmall, textAlign: TextAlign.center),
             Image.asset(
               'assets/images/regina_app_logo.png',
               width: 200,
