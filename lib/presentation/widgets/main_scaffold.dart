@@ -24,14 +24,17 @@ class MainScaffold extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Regina App',
           style: TextStyle(
             fontFamily: 'Georgia',
             fontSize: 29,
             letterSpacing: 1.1,
             fontStyle: FontStyle.italic,
-            color: Colors.black,
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
             shadows: [
               Shadow(
                 offset: Offset(0, 1.5),
