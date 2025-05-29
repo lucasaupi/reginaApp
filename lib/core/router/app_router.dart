@@ -3,6 +3,7 @@ import 'package:regina_app/presentation/screens/home_screen.dart';
 import 'package:regina_app/presentation/screens/order_summary_screen.dart';
 import 'package:regina_app/presentation/screens/product_detail_screen.dart';
 import 'package:regina_app/presentation/screens/product_screen.dart';
+import 'package:regina_app/presentation/screens/purchase_confirmation_screen.dart';
 import 'package:regina_app/presentation/screens/service_detail_screen.dart';
 import 'package:regina_app/presentation/screens/services_screen.dart';
 import 'package:regina_app/presentation/screens/login_screen.dart';
@@ -59,11 +60,16 @@ final GoRouter appRouter = GoRouter(
       name: 'cart',
       builder: (context, state) => const CartScreen(),),
 
-      GoRoute(
-  path: '/order-summary',
-  name: 'order-summary',
-  builder: (context, state) => const OrderSummaryScreen(),
-),
+      GoRoute( 
+        path: '/order-summary',
+        name: 'order-summary',
+        builder: (context, state) => const OrderSummaryScreen(),
+        ),
+        GoRoute(
+          path: '/confirm-order',
+          name: 'confirm-order',
+          builder: (context, state) => const PurchaseConfirmationScreen(),
+          ),
       ],
     ),
   ],

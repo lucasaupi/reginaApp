@@ -21,19 +21,7 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Carrito'),
-       actions: [
-        //Boton de cierre de sesion para probar-aca no va
-    IconButton(
-      icon: const Icon(Icons.logout),
-      tooltip: 'Cerrar sesión',
-      onPressed: () async {
-        await ref.read(authControllerProvider.notifier).logout();
-        if (context.mounted) {
-          context.go('/login'); // Asegurate de tener esta ruta
-        }
-      },
-    ),
-  ],),
+       ),
       body: Column(
         children: [
           Expanded(
@@ -57,35 +45,18 @@ class CartScreen extends ConsumerWidget {
           ),
 
           ElevatedButton(
-  onPressed: () async {
-    final notifier = ref.read(orderProvider.notifier);
-    await notifier.createAndSaveOrder();
-
-    if (!context.mounted) return;
-
-    final orderState = ref.read(orderProvider);
-    orderState.when(
-      data: (order) {
-        if (order != null) {
-          context.go('/order-summary');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No se pudo generar la orden.')),
-          );
-        }
-      },
-      error: (e, _) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      },
-      loading: () {
-        // Podés mostrar un loader si querés
-      },
-    );
-  },
-  child: const Text('Confirmar compra'),
-),
+             onPressed: () {
+               final cart = ref.read(cartProvider);
+               if (cart.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(content: Text('El carrito está vacío.')),
+                   );
+                   return;
+                   }
+                   context.push('/confirm-order');
+                   },
+                   child: const Text('Comprar'),
+                   ),
 
           
           Padding(
