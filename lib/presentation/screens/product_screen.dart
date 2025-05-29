@@ -18,7 +18,7 @@ class ProductScreen extends ConsumerWidget {
         title: const Text('Productos'),
         actions: [
           IconButton(
-            icon: Icon(searchByName ? Icons.text_fields : Icons.description),
+            icon: Icon(searchByName ? Icons.description : Icons.text_fields),
             onHover:
                 (value) =>
                     ref.read(searchByNameProvider.notifier).state = value,
