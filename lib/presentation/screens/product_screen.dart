@@ -19,7 +19,6 @@ class ProductScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos'),
-        actions: [CartIconButton()],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(

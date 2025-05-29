@@ -41,11 +41,6 @@ class HomeScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Regina App'),
-        actions: [ThemeToggleButton(), CartIconButton()],
-        centerTitle: true,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
