@@ -3,29 +3,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/presentation/providers/cart_provider.dart';
-import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
 import 'package:regina_app/presentation/providers/search_provider.dart';
 
 class ProductScreen extends ConsumerWidget {
-  ProductScreen({super.key});
+  const ProductScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filteredProducts = ref.watch(filteredProductsProvider);
-
-    final cart = ref.watch(cartProvider);
-    final totalItems = ref.watch(cartProvider.notifier).totalItems;
+    final searchByName = ref.watch(searchByNameProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos'),
+        actions: [
+          IconButton(
+            icon: Icon(searchByName ? Icons.text_fields : Icons.description),
+            onHover:
+                (value) =>
+                    ref.read(searchByNameProvider.notifier).state = value,
+            tooltip:
+                searchByName ? 'Buscar por descripción' : 'Buscar por nombre',
+            onPressed: () {
+              ref.read(searchByNameProvider.notifier).state = !searchByName;
+            },
+          ),
+        ],
+
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Buscar...',
+                hintText:
+                    searchByName
+                        ? 'Buscar por nombre...'
+                        : 'Buscar por descripción...',
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
