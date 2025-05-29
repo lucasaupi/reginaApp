@@ -5,13 +5,12 @@ import 'package:regina_app/domain/product.dart';
 class CartNotifier extends StateNotifier<List<CartItem>> {
   CartNotifier() : super([]);
 
-  
   void addToCart(Product product, {int quantity = 1}) {
     final index = state.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
       final existing = state[index];
       final updated = existing.copyWith(quantity: existing.quantity + quantity);
-       final newState = [...state];
+      final newState = [...state];
       newState[index] = updated;
       state = newState;
     } else {
@@ -19,10 +18,8 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     }
   }
 
-
-
   void removeOneFromCart(Product product) {
-     final index = state.indexWhere((item) => item.product.id == product.id);
+    final index = state.indexWhere((item) => item.product.id == product.id);
     if (index != -1) {
       final current = state[index];
       if (current.quantity > 1) {
@@ -35,24 +32,21 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
       }
     }
   }
-   
 
-  
- void removeAllOf(Product product) {
-  state = state.where((item) => item.product.id != product.id).toList();
-}
+  void removeAllOf(Product product) {
+    state = state.where((item) => item.product.id != product.id).toList();
+  }
 
-  
   void clearCart() {
     state = [];
   }
 
- double get total => state.fold(0,
-      (sum, item) => sum + (item.product.price * item.quantity));
+  double get total =>
+      state.fold(0, (sum, item) => sum + (item.product.price * item.quantity));
 
   int get totalItems {
-  return state.fold(0, (sum, item) => sum + item.quantity);
-}
+    return state.fold(0, (sum, item) => sum + item.quantity);
+  }
 }
 
 final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {

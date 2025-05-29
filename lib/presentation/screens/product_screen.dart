@@ -29,7 +29,6 @@ class ProductScreen extends ConsumerWidget {
             },
           ),
         ],
-
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(
@@ -62,6 +61,31 @@ class ProductScreen extends ConsumerWidget {
   }
 }
 
+class QuantityNotifier extends StateNotifier<Map<String, int>> {
+  QuantityNotifier() : super({});
+
+  void increment(String productId) {
+    final current = state[productId] ?? 0;
+    state = {...state, productId: current + 1};
+  }
+
+  void decrement(String productId) {
+    final current = state[productId] ?? 0;
+    if (current > 1) {
+      state = {...state, productId: current - 1};
+    } else {
+      final newState = Map<String, int>.from(state);
+      newState.remove(productId);
+      state = newState;
+    }
+  }
+}
+
+final quantityProvider =
+    StateNotifierProvider<QuantityNotifier, Map<String, int>>((ref) {
+      return QuantityNotifier();
+    });
+
 class _ProductListView extends StatelessWidget {
   const _ProductListView({super.key, required this.products});
 
@@ -86,6 +110,8 @@ class _ProductItemView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartNotifier = ref.read(cartProvider.notifier);
+    final quantityMap = ref.watch(quantityProvider);
+    final quantity = quantityMap[product.id] ?? 0;
 
     return Card(
       child: ListTile(
@@ -108,15 +134,44 @@ class _ProductItemView extends ConsumerWidget {
                 ),
         title: Text(product.name),
         subtitle: Text(product.description),
-        trailing: IconButton(
-          icon: const Icon(Icons.add_circle_outline),
-          onPressed: () {
-            cartNotifier.addToCart(product);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${product.name} agregado al carrito')),
-            );
-          },
-        ),
+        trailing:
+            quantity == 0
+                ? IconButton(
+                  icon: const Icon(Icons.add_circle_outline),
+                  onPressed: () {
+                    ref.read(quantityProvider.notifier).increment(product.id);
+                    cartNotifier.addToCart(product, quantity: 1);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product.name} agregado al carrito'),
+                      ),
+                    );
+                  },
+                )
+                : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () {
+                        ref
+                            .read(quantityProvider.notifier)
+                            .decrement(product.id);
+                        cartNotifier.removeOneFromCart(product);
+                      },
+                    ),
+                    Text('$quantity'),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () {
+                        ref
+                            .read(quantityProvider.notifier)
+                            .increment(product.id);
+                        cartNotifier.addToCart(product, quantity: 1);
+                      },
+                    ),
+                  ],
+                ),
       ),
     );
   }
