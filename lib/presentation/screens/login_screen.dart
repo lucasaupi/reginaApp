@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:regina_app/presentation/screens/password_reset.dart';
 import 'package:regina_app/presentation/screens/register_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:regina_app/presentation/providers/auth_controller_provider.dart';
@@ -81,9 +82,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Correo Electrónico',
                 ),
-                validator:
-                    (val) =>
-                        val == null || val.isEmpty ? 'Ingrese su correo' : null,
+                validator: (val) {
+                  if (val == null || val.isEmpty) {
+                    return 'Ingrese su correo';
+                  }
+                  final emailRegex = RegExp(
+                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                  );
+
+                  if (!emailRegex.hasMatch(val)) {
+                    return 'Ingrese un correo válido';
+                  }
+
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -96,7 +108,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ? 'Mínimo 6 caracteres'
                             : null,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PasswordRecoveryScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    '¿Olvidaste tu contraseña?',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+
               state.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(

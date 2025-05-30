@@ -44,7 +44,14 @@ class AuthController extends AsyncNotifier<void> {
 
       state = const AsyncData(null);
     } on FirebaseAuthException catch (e) {
-      state = AsyncError(e.message ?? 'Error desconocido', StackTrace.current);
+      if (e.code == 'email-already-in-use') {
+        state = AsyncError('El correo ya está registrado', StackTrace.current);
+      } else {
+        state = AsyncError(
+          e.message ?? 'Error desconocido',
+          StackTrace.current,
+        );
+      }
     }
   }
 
@@ -65,6 +72,16 @@ class AuthController extends AsyncNotifier<void> {
       state = const AsyncData(null);
     } catch (e, st) {
       state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> sendPasswordReset(String email) async {
+    state = const AsyncLoading();
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      state = const AsyncData(null);
+    } on FirebaseAuthException catch (e) {
+      state = AsyncError(e.message ?? 'Error desconocido', StackTrace.current);
     }
   }
 }

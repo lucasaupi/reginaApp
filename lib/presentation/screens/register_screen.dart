@@ -58,10 +58,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ).showSnackBar(const SnackBar(content: Text('Registro exitoso')));
       Navigator.pop(currentContext);
     } else {
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text(state.error?.toString() ?? 'Error desconocido')),
-      );
+      final errorMsg = state.error?.toString();
+
+      String finalMessage = 'Error desconocido';
+
+      if (errorMsg != null && errorMsg.contains('correo ya está registrado')) {
+        finalMessage = 'El correo ingresado ya está registrado';
+      } else if (errorMsg != null) {
+        finalMessage = errorMsg;
+      }
+
+      ScaffoldMessenger.of(
+        currentContext,
+      ).showSnackBar(SnackBar(content: Text(finalMessage)));
     }
+  }
+
+  String? validateName(String? value, String label) {
+    final nameRegExp = RegExp(r"^[a-zA-ZÁÉÍÓÚáéíóúñÑ\s]{1,30}$");
+
+    if (value == null || value.trim().isEmpty) {
+      return 'Ingrese su $label';
+    } else if (!nameRegExp.hasMatch(value.trim())) {
+      return '$label inválido. Solo letras y máximo 30 caracteres.';
+    }
+    return null;
   }
 
   @override
@@ -80,19 +101,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextFormField(
                 controller: _firstNameController,
                 decoration: const InputDecoration(labelText: 'Nombre'),
-                validator:
-                    (val) =>
-                        val == null || val.isEmpty ? 'Ingrese su nombre' : null,
+                validator: (val) => validateName(val, 'Nombre'),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _lastNameController,
                 decoration: const InputDecoration(labelText: 'Apellido'),
-                validator:
-                    (val) =>
-                        val == null || val.isEmpty
-                            ? 'Ingrese su apellido'
-                            : null,
+                validator: (val) => validateName(val, 'Apellido'),
               ),
               const SizedBox(height: 16),
               TextFormField(
