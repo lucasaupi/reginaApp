@@ -7,10 +7,13 @@ class ThemeToggleButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.read(themeModeProvider.notifier).state;
+
     return IconButton(
-      icon: const Icon(Icons.brightness_6),
+      icon: Icon(
+        current == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+      ),
       onPressed: () {
-        final current = ref.read(themeModeProvider.notifier).state;
         ref.read(themeModeProvider.notifier).state =
             current == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
       },
