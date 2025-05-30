@@ -5,7 +5,9 @@ import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/domain/service.dart';
 import 'package:regina_app/presentation/providers/product_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
+import 'package:regina_app/presentation/providers/user_provider.dart';
 import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
+import 'package:regina_app/presentation/widgets/theme_button.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -17,18 +19,33 @@ class HomeScreen extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final products = ref.watch(productProvider);
     final services = ref.watch(serviceProvider);
+    final userAsync = ref.watch(userProvider);
+    final userNameAsync = ref.watch(userNameProvider);
+
+    final saludo = userAsync.when(
+      data: (user) {
+        if (user != null && user.emailVerified) {
+          return userNameAsync.when(
+            data:
+                (nombre) =>
+                    nombre != null ? 'Bienvenido, $nombre 👋' : 'Bienvenido 👋',
+            loading: () => 'Cargando nombre...',
+            error: (_, __) => 'Bienvenido 👋',
+          );
+        } else {
+          return 'Que tengas un hermoso día ✨';
+        }
+      },
+      loading: () => 'Cargando...',
+      error: (e, _) => 'Error al cargar usuario',
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          CartIconButton(),
-          ],
-       centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            Text('Que tengas un hermoso día ✨', style: textTheme.headlineSmall, textAlign: TextAlign.center),
+            Text(saludo, style: textTheme.headlineSmall),
             Image.asset(
               'assets/images/regina_app_logo.png',
               width: 200,
@@ -50,7 +67,6 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             _HorizontalServiceList(services: services),
-            
           ],
         ),
       ),
@@ -150,17 +166,18 @@ class _SquareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: imageUrl != null
-                  ? ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(12),
+              child:
+                  imageUrl != null
+                      ? ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(12),
+                        ),
+                        child: Image.network(imageUrl!, fit: BoxFit.cover),
+                      )
+                      : Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image_not_supported, size: 40),
                       ),
-                      child: Image.network(imageUrl!, fit: BoxFit.cover),
-                    )
-                  : Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image_not_supported, size: 40),
-                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

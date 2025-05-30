@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
+import 'package:regina_app/presentation/widgets/theme_button.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget child;
@@ -22,16 +24,28 @@ class MainScaffold extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Regina App'),
-        actions: [
-          if (showCartButton)
-            IconButton(
-              icon: const Icon(Icons.shopping_cart),
-              onPressed: () {
-                context.push('/cart');  // Abre la pantalla carrito
-              },
-            ),
-        ],
+        title: Text(
+          'Regina App',
+          style: TextStyle(
+            fontFamily: 'Georgia',
+            fontSize: 29,
+            letterSpacing: 1.1,
+            fontStyle: FontStyle.italic,
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1.5),
+                blurRadius: 2,
+                color: Colors.black26,
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        actions: [ThemeToggleButton(), CartIconButton()],
       ),
       body: child,
       bottomNavigationBar: BottomNavigationBar(
