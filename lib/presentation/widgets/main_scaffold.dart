@@ -9,10 +9,7 @@ import 'package:regina_app/presentation/providers/auth_controller_provider.dart'
 class MainScaffold extends ConsumerWidget {
   final Widget child;
 
-  const MainScaffold({
-    super.key,
-    required this.child,
-  });
+  const MainScaffold({super.key, required this.child});
 
   static const allTabs = ['/', '/products', '/services', '/login'];
 
@@ -25,9 +22,10 @@ class MainScaffold extends ConsumerWidget {
         final userLoggedIn = user != null;
 
         // Si está logueado, sacamos el tab de login
-        final tabs = userLoggedIn
-            ? allTabs.where((tab) => tab != '/login').toList()
-            : allTabs;
+        final tabs =
+            userLoggedIn
+                ? allTabs.where((tab) => tab != '/login').toList()
+                : allTabs;
 
         final String location = GoRouterState.of(context).uri.toString();
 
@@ -43,9 +41,10 @@ class MainScaffold extends ConsumerWidget {
                 fontSize: 29,
                 letterSpacing: 1.1,
                 fontStyle: FontStyle.italic,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
                 shadows: const [
                   Shadow(
                     offset: Offset(0, 1.5),
@@ -57,7 +56,7 @@ class MainScaffold extends ConsumerWidget {
             ),
             centerTitle: true,
             actions: [
-              const ThemeToggleButton(),
+              ThemeToggleButton(),
               const CartIconButton(),
               if (userLoggedIn)
                 IconButton(
@@ -76,26 +75,36 @@ class MainScaffold extends ConsumerWidget {
             type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
             onTap: (index) => context.go(tabs[index]),
-            items: tabs.map((tab) {
-              switch (tab) {
-                case '/':
-                  return const BottomNavigationBarItem(
-                      icon: Icon(Icons.home), label: 'Inicio');
-                case '/products':
-                  return const BottomNavigationBarItem(
-                      icon: Icon(Icons.shopping_bag), label: 'Productos');
-                case '/services':
-                  return const BottomNavigationBarItem(
-                      icon: Icon(Icons.calendar_today), label: 'Turnos');
-                case '/login':
-                  return const BottomNavigationBarItem(
-                      icon: Icon(Icons.account_circle_rounded),
-                      label: 'Ingresar');
-                default:
-                  return const BottomNavigationBarItem(
-                      icon: Icon(Icons.error), label: 'Error');
-              }
-            }).toList(),
+            items:
+                tabs.map((tab) {
+                  switch (tab) {
+                    case '/':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: 'Inicio',
+                      );
+                    case '/products':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.shopping_bag),
+                        label: 'Productos',
+                      );
+                    case '/services':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.calendar_today),
+                        label: 'Turnos',
+                      );
+                    case '/login':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.account_circle_rounded),
+                        label: 'Ingresar',
+                      );
+                    default:
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.error),
+                        label: 'Error',
+                      );
+                  }
+                }).toList(),
           ),
         );
       },
