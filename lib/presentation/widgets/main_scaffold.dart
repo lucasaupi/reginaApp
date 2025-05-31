@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
 import 'package:regina_app/presentation/widgets/theme_button.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
-import 'package:regina_app/presentation/providers/auth_controller_provider.dart'; // importa tu authControllerProvider
+import 'package:regina_app/presentation/providers/auth_controller_provider.dart';
 
 class MainScaffold extends ConsumerWidget {
   final Widget child;
@@ -21,7 +21,6 @@ class MainScaffold extends ConsumerWidget {
       data: (user) {
         final userLoggedIn = user != null;
 
-        // Si está logueado, sacamos el tab de login
         final tabs =
             userLoggedIn
                 ? allTabs.where((tab) => tab != '/login').toList()
@@ -64,7 +63,6 @@ class MainScaffold extends ConsumerWidget {
                   tooltip: 'Cerrar sesión',
                   onPressed: () async {
                     await ref.read(authControllerProvider.notifier).logout();
-                    // opcional: redirigir al login después de logout
                     context.go('/login');
                   },
                 ),
