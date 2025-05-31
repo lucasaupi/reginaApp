@@ -12,6 +12,7 @@ class MainScaffold extends ConsumerWidget {
   const MainScaffold({super.key, required this.child});
 
   static const allTabs = ['/', '/products', '/services', '/login'];
+  static const primaryColor = Color(0xFF007AFF);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,13 +22,11 @@ class MainScaffold extends ConsumerWidget {
       data: (user) {
         final userLoggedIn = user != null;
 
-        final tabs =
-            userLoggedIn
-                ? allTabs.where((tab) => tab != '/login').toList()
-                : allTabs;
+        final tabs = userLoggedIn
+            ? allTabs.where((tab) => tab != '/login').toList()
+            : allTabs;
 
         final String location = GoRouterState.of(context).uri.toString();
-
         int currentIndex = tabs.indexWhere((t) => location == t);
         if (currentIndex == -1) currentIndex = 0;
 
@@ -40,10 +39,9 @@ class MainScaffold extends ConsumerWidget {
                 fontSize: 29,
                 letterSpacing: 1.1,
                 fontStyle: FontStyle.italic,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
                 shadows: const [
                   Shadow(
                     offset: Offset(0, 1.5),
@@ -62,8 +60,29 @@ class MainScaffold extends ConsumerWidget {
                   icon: const Icon(Icons.logout),
                   tooltip: 'Cerrar sesión',
                   onPressed: () async {
-                    await ref.read(authControllerProvider.notifier).logout();
-                    context.go('/login');
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('¿Cerrar sesión?'),
+                        content: const Text(
+                            '¿Estás seguro de que querés cerrar sesión?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Cerrar sesión'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmed == true) {
+                      await ref.read(authControllerProvider.notifier).logout();
+                      context.go('/login');
+                    }
                   },
                 ),
             ],
@@ -72,37 +91,38 @@ class MainScaffold extends ConsumerWidget {
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
+            selectedItemColor: primaryColor,
+            unselectedItemColor: Colors.grey,
             onTap: (index) => context.go(tabs[index]),
-            items:
-                tabs.map((tab) {
-                  switch (tab) {
-                    case '/':
-                      return const BottomNavigationBarItem(
-                        icon: Icon(Icons.home),
-                        label: 'Inicio',
-                      );
-                    case '/products':
-                      return const BottomNavigationBarItem(
-                        icon: Icon(Icons.shopping_bag),
-                        label: 'Productos',
-                      );
-                    case '/services':
-                      return const BottomNavigationBarItem(
-                        icon: Icon(Icons.calendar_today),
-                        label: 'Turnos',
-                      );
-                    case '/login':
-                      return const BottomNavigationBarItem(
-                        icon: Icon(Icons.account_circle_rounded),
-                        label: 'Ingresar',
-                      );
-                    default:
-                      return const BottomNavigationBarItem(
-                        icon: Icon(Icons.error),
-                        label: 'Error',
-                      );
-                  }
-                }).toList(),
+            items: tabs.map((tab) {
+              switch (tab) {
+                case '/':
+                  return const BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Inicio',
+                  );
+                case '/products':
+                  return const BottomNavigationBarItem(
+                    icon: Icon(Icons.shopping_bag),
+                    label: 'Productos',
+                  );
+                case '/services':
+                  return const BottomNavigationBarItem(
+                    icon: Icon(Icons.calendar_today),
+                    label: 'Turnos',
+                  );
+                case '/login':
+                  return const BottomNavigationBarItem(
+                    icon: Icon(Icons.account_circle_rounded),
+                    label: 'Ingresar',
+                  );
+                default:
+                  return const BottomNavigationBarItem(
+                    icon: Icon(Icons.error),
+                    label: 'Error',
+                  );
+              }
+            }).toList(),
           ),
         );
       },

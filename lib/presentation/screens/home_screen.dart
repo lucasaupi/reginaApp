@@ -6,8 +6,6 @@ import 'package:regina_app/domain/service.dart';
 import 'package:regina_app/presentation/providers/product_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
-import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
-import 'package:regina_app/presentation/widgets/theme_button.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -16,21 +14,21 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
     Future.microtask(() => ref.read(serviceProvider.notifier).getAllServices());
-    final textTheme = Theme.of(context).textTheme;
+
     final products = ref.watch(productProvider);
     final services = ref.watch(serviceProvider);
     final userAsync = ref.watch(userProvider);
     final userNameAsync = ref.watch(userNameProvider);
+    final colorPrimary = Theme.of(context).colorScheme.primary;
 
     final saludo = userAsync.when(
       data: (user) {
         if (user != null && user.emailVerified) {
           return userNameAsync.when(
-            data:
-                (nombre) =>
-                    nombre != null ? 'Bienvenido, $nombre 👋' : 'Bienvenido 👋',
+            data: (nombre) =>
+                nombre != null ? '¡Hola, $nombre! 👋' : '¡Bienvenido! 👋',
             loading: () => 'Cargando nombre...',
-            error: (_, __) => 'Bienvenido 👋',
+            error: (_, __) => '¡Bienvenido! 👋',
           );
         } else {
           return 'Que tengas un hermoso día ✨';
@@ -41,34 +39,40 @@ class HomeScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            Text(saludo, style: textTheme.headlineSmall),
-            Image.asset(
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        children: [
+          Text(
+            saludo,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Image.asset(
               'assets/images/regina_app_logo.png',
-              width: 200,
-              height: 200,
+              width: 160,
+              height: 160,
             ),
-            const SizedBox(height: 20),
-            _SectionHeader(
-              title: 'Productos',
-              onTap: () => context.push('/products'),
-            ),
-            const SizedBox(height: 8),
-            _HorizontalProductList(products: products),
-
-            const SizedBox(height: 20),
-
-            _SectionHeader(
-              title: 'Servicios',
-              onTap: () => context.push('/services'),
-            ),
-            const SizedBox(height: 8),
-            _HorizontalServiceList(services: services),
-          ],
-        ),
+          ),
+          const SizedBox(height: 28),
+          _SectionHeader(
+            title: 'Productos',
+            onTap: () => context.push('/products'),
+          ),
+          const SizedBox(height: 8),
+          _HorizontalProductList(products: products),
+          const SizedBox(height: 28),
+          _SectionHeader(
+            title: 'Servicios',
+            onTap: () => context.push('/services'),
+          ),
+          const SizedBox(height: 8),
+          _HorizontalServiceList(services: services),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -82,17 +86,19 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.primary;
     final textTheme = Theme.of(context).textTheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: textTheme.titleLarge),
-        IconButton(
-          icon: const Icon(Icons.arrow_forward_ios, size: 16),
+        Text(title,
+            style: textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold)),
+        TextButton(
           onPressed: onTap,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
+          style: TextButton.styleFrom(foregroundColor: color),
+          child: const Text('Ver más'),
         ),
       ],
     );
@@ -160,30 +166,29 @@ class _SquareCard extends StatelessWidget {
     return SizedBox(
       width: 140,
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 3,
+        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child:
-                  imageUrl != null
-                      ? ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
-                        ),
-                        child: Image.network(imageUrl!, fit: BoxFit.cover),
-                      )
-                      : Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported, size: 40),
-                      ),
+              child: imageUrl != null
+                  ? Image.network(imageUrl!, fit: BoxFit.cover)
+                  : Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported, size: 40),
+                    ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
