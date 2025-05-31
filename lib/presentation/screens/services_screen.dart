@@ -22,6 +22,7 @@ class ServicesScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 hintText: 'Buscar servicio...',
                 filled: true,
