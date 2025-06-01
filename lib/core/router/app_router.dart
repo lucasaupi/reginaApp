@@ -56,7 +56,6 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => LoginScreen(),
         ),
         GoRoute(
-          // <--- ESTA ES LA NUEVA RUTA
           path: '/cart',
           name: 'cart',
           builder: (context, state) => const CartScreen(),
@@ -66,21 +65,16 @@ final GoRouter appRouter = GoRouter(
           name: 'appointments',
           builder: (context, state) => const AppointmentsScreen(),
         ),
-          GoRoute( 
-      path: '/cart',
-      name: 'cart',
-      builder: (context, state) => const CartScreen(),),
-
-      GoRoute( 
-        path: '/order-summary',
-        name: 'order-summary',
-        builder: (context, state) => const OrderSummaryScreen(),
+        GoRoute(
+          path: '/order-summary',
+          name: 'order-summary',
+          builder: (context, state) => const OrderSummaryScreen(),
         ),
         GoRoute(
           path: '/confirm-order',
           name: 'confirm-order',
           builder: (context, state) => const PurchaseConfirmationScreen(),
-          ),
+        ),
       ],
     ),
   ],

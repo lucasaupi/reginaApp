@@ -2,23 +2,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regina_app/domain/appointment.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   AppointmentNotifier(this.ref) : super([]) {
-    _loadAppointments();
+    // Escuchar cambios en el usuario y cargar turnos
+    ref.listen<AsyncValue<User?>>(userProvider, (previous, next) async {
+      final user = next.value;
+      if (user == null) {
+        // Si se cerró sesión, limpiar los turnos
+        state = [];
+      } else {
+        await _loadAppointments(user.uid);
+      }
+    }, fireImmediately: true);
   }
 
   final Ref ref;
 
-  Future<void> _loadAppointments() async {
-    final user = ref.read(userProvider).value;
-    if (user == null) return;
-
+  Future<void> _loadAppointments(String userId) async {
     final snapshot =
         await FirebaseFirestore.instance
             .collection('appointments')
-            .where('userId', isEqualTo: user.uid)
-            .orderBy('date')
+            .where('userId', isEqualTo: userId)
             .get();
 
     state = snapshot.docs.map((doc) => Appointment.fromFirestore(doc)).toList();

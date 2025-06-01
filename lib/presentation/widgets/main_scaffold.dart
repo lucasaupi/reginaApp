@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:regina_app/presentation/providers/appointment_provider.dart';
 import 'package:regina_app/presentation/widgets/cart_icon_button.dart';
 import 'package:regina_app/presentation/widgets/theme_button.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
@@ -81,6 +82,7 @@ class MainScaffold extends ConsumerWidget {
 
                     if (confirmed == true) {
                       await ref.read(authControllerProvider.notifier).logout();
+                       ref.invalidate(appointmentProvider); // Limpia turnos al cerrar sesión
                       context.go('/login');
                     }
                   },
