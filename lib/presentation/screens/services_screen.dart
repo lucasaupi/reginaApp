@@ -2,33 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/service.dart';
+import 'package:regina_app/presentation/providers/search_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
 import 'package:regina_app/presentation/widgets/appointment_icon_button.dart';
 
 class ServicesScreen extends ConsumerWidget {
-  const ServicesScreen({super.key});
+  ServicesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final services = ref.watch(serviceProvider);
 
+    final filteredServices = ref.watch(filteredServicesProvider);
     // Future.microtask(() => ref.read(serviceProvider.notifier).getAllServices());
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Servicios'),
         actions: const [AppointmentIconButton()],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              style: const TextStyle(color: Colors.black),
+              decoration: InputDecoration(
+                hintText: 'Buscar servicio...',
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged:
+                  (value) =>
+                      ref.read(searchQueryProvider.notifier).state = value,
+            ),
+          ),
+        ),
       ),
       body:
           services.isEmpty
               ? const Center(child: Text("No hay servicios"))
-              : _ServiceListView(services: services),
+              : _ServiceListView(services: filteredServices),
     );
   }
 }
 
 class _ServiceListView extends StatelessWidget {
-  const _ServiceListView({required this.services});
+  const _ServiceListView({super.key, required this.services});
 
   final List<Service> services;
 
@@ -44,7 +67,7 @@ class _ServiceListView extends StatelessWidget {
 }
 
 class _ServiceItemView extends StatelessWidget {
-  const _ServiceItemView({required this.service});
+  const _ServiceItemView({super.key, required this.service});
 
   final Service service;
 
