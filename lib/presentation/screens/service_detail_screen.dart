@@ -5,6 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
 import 'package:regina_app/presentation/providers/slots_provider.dart';
+import 'package:regina_app/presentation/providers/appointment_provider.dart';
+import 'package:regina_app/domain/appointment.dart';
+import 'package:regina_app/domain/service.dart';
+import 'package:regina_app/presentation/providers/user_provider.dart';
 
 class ServiceDetailScreen extends ConsumerStatefulWidget {
   final String serviceId;
@@ -12,18 +16,23 @@ class ServiceDetailScreen extends ConsumerStatefulWidget {
   const ServiceDetailScreen({super.key, required this.serviceId});
 
   @override
-  ConsumerState<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
+  ConsumerState<ServiceDetailScreen> createState() =>
+      _ServiceDetailScreenState();
 }
 
 class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   DateTime? _selectedSlot;
+  late final Service service;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
+
+    final services = ref.read(serviceProvider);
+    service = services.firstWhere((s) => s.id == widget.serviceId);
   }
 
   List<DateTime> _slotsForSelectedDay(List<DateTime> allSlots) {
@@ -31,25 +40,91 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     return allSlots.where((slot) => isSameDay(slot, _selectedDay)).toList();
   }
 
-  void _confirmarReserva() {
+  void _confirmarReserva() async {
     if (_selectedSlot == null) return;
 
-    final hora = DateFormat('HH:mm').format(_selectedSlot!);
-    final fecha = DateFormat('EEEE d MMMM', 'es').format(_selectedSlot!);
+    final userState = ref.read(userProvider);
+    final user = userState.value;
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Reserva confirmada'),
-        content: Text('Turno reservado para el $fecha a las $hora.'),
-        actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: const Text('Aceptar'),
-          ),
-        ],
-      ),
+    if (user == null) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Iniciar sesión'),
+              content: const Text(
+                'Necesitás iniciar sesión para reservar un turno.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context.push('/login'); 
+                  },
+                  child: const Text('Iniciar sesión'),
+                ),
+              ],
+            ),
+      );
+      return;
+    }
+
+    final service = ref
+        .read(serviceProvider)
+        .firstWhere((s) => s.id == widget.serviceId);
+
+    final appointment = Appointment(
+      id: '', // Se completa luego con el ID generado
+      userId: user.uid,
+      serviceName: service.name,
+      date: _selectedSlot!,
     );
+
+    try {
+      final notifier = ref.read(appointmentProvider.notifier);
+      await notifier.add(appointment);
+
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('Reserva confirmada'),
+              content: Text(
+                'Turno reservado para el ${DateFormat('EEEE d MMMM', 'es').format(_selectedSlot!)} a las ${DateFormat('HH:mm').format(_selectedSlot!)}.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Aceptar'),
+                ),
+              ],
+            ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text('Error'),
+              content: Text('No se pudo reservar el turno: $e'),
+              actions: [
+                TextButton(
+                  onPressed: () => context.pop(),
+                  child: const Text('Cerrar'),
+                ),
+              ],
+            ),
+      );
+    }
   }
 
   @override
@@ -100,7 +175,10 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Horarios disponibles:', style: textTheme.titleMedium),
+              child: Text(
+                'Horarios disponibles:',
+                style: textTheme.titleMedium,
+              ),
             ),
             const SizedBox(height: 8),
 
