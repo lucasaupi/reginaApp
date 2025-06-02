@@ -40,9 +40,6 @@ class ProductScreen extends ConsumerWidget {
                     searchByName
                         ? 'Buscar por nombre...'
                         : 'Buscar por descripción...',
-                hintStyle: const TextStyle(
-                  color: Color.fromARGB(255, 100, 100, 100),
-                ),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
