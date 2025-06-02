@@ -23,9 +23,10 @@ class MainScaffold extends ConsumerWidget {
       data: (user) {
         final userLoggedIn = user != null;
 
-        final tabs = userLoggedIn
-            ? allTabs.where((tab) => tab != '/login').toList()
-            : allTabs;
+        final tabs =
+            userLoggedIn
+                ? allTabs.where((tab) => tab != '/login').toList()
+                : allTabs;
 
         final String location = GoRouterState.of(context).uri.toString();
         int currentIndex = tabs.indexWhere((t) => location == t);
@@ -33,25 +34,31 @@ class MainScaffold extends ConsumerWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              'Regina App',
-              style: TextStyle(
-                fontFamily: 'Georgia',
-                fontSize: 29,
-                letterSpacing: 1.1,
-                fontStyle: FontStyle.italic,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black,
-                shadows: const [
-                  Shadow(
-                    offset: Offset(0, 1.5),
-                    blurRadius: 2,
-                    color: Colors.black26,
-                  ),
-                ],
+            title: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: primaryColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Regina App',
+                style: TextStyle(
+                  fontFamily: 'Georgia',
+                  fontSize: 29,
+                  letterSpacing: 1.1,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                      offset: Offset(0, 1.5),
+                      blurRadius: 2,
+                      color: Colors.black26,
+                    ),
+                  ],
+                ),
               ),
             ),
+
             centerTitle: true,
             actions: [
               ThemeToggleButton(),
@@ -63,26 +70,32 @@ class MainScaffold extends ConsumerWidget {
                   onPressed: () async {
                     final confirmed = await showDialog<bool>(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('¿Cerrar sesión?'),
-                        content: const Text(
-                            '¿Estás seguro de que querés cerrar sesión?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancelar'),
+                      builder:
+                          (context) => AlertDialog(
+                            title: const Text('¿Cerrar sesión?'),
+                            content: const Text(
+                              '¿Estás seguro de que querés cerrar sesión?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(false),
+                                child: const Text('Cancelar'),
+                              ),
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(true),
+                                child: const Text('Cerrar sesión'),
+                              ),
+                            ],
                           ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Cerrar sesión'),
-                          ),
-                        ],
-                      ),
                     );
 
                     if (confirmed == true) {
                       await ref.read(authControllerProvider.notifier).logout();
-                       ref.invalidate(appointmentProvider); // Limpia turnos al cerrar sesión
+                      ref.invalidate(
+                        appointmentProvider,
+                      ); // Limpia turnos al cerrar sesión
                       context.go('/login');
                     }
                   },
@@ -96,35 +109,36 @@ class MainScaffold extends ConsumerWidget {
             selectedItemColor: primaryColor,
             unselectedItemColor: Colors.grey,
             onTap: (index) => context.go(tabs[index]),
-            items: tabs.map((tab) {
-              switch (tab) {
-                case '/':
-                  return const BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
-                    label: 'Inicio',
-                  );
-                case '/products':
-                  return const BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_bag),
-                    label: 'Productos',
-                  );
-                case '/services':
-                  return const BottomNavigationBarItem(
-                    icon: Icon(Icons.calendar_today),
-                    label: 'Turnos',
-                  );
-                case '/login':
-                  return const BottomNavigationBarItem(
-                    icon: Icon(Icons.account_circle_rounded),
-                    label: 'Ingresar',
-                  );
-                default:
-                  return const BottomNavigationBarItem(
-                    icon: Icon(Icons.error),
-                    label: 'Error',
-                  );
-              }
-            }).toList(),
+            items:
+                tabs.map((tab) {
+                  switch (tab) {
+                    case '/':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: 'Inicio',
+                      );
+                    case '/products':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.shopping_bag),
+                        label: 'Productos',
+                      );
+                    case '/services':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.calendar_today),
+                        label: 'Turnos',
+                      );
+                    case '/login':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.account_circle_rounded),
+                        label: 'Ingresar',
+                      );
+                    default:
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.error),
+                        label: 'Error',
+                      );
+                  }
+                }).toList(),
           ),
         );
       },
