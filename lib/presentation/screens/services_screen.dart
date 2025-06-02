@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/service.dart';
 import 'package:regina_app/presentation/providers/search_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
+import 'package:regina_app/presentation/widgets/appointment_icon_button.dart';
 
 class ServicesScreen extends ConsumerWidget {
   ServicesScreen({super.key});
@@ -11,12 +12,14 @@ class ServicesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final services = ref.watch(serviceProvider);
+
     final filteredServices = ref.watch(filteredServicesProvider);
     // Future.microtask(() => ref.read(serviceProvider.notifier).getAllServices());
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Servicios'),
+        actions: const [AppointmentIconButton()],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(

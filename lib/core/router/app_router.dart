@@ -9,7 +9,7 @@ import 'package:regina_app/presentation/screens/services_screen.dart';
 import 'package:regina_app/presentation/screens/login_screen.dart';
 import 'package:regina_app/presentation/widgets/main_scaffold.dart';
 import 'package:regina_app/presentation/screens/cart_screen.dart';
-
+import 'package:regina_app/presentation/screens/appointments_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -55,21 +55,26 @@ final GoRouter appRouter = GoRouter(
           name: 'login',
           builder: (context, state) => LoginScreen(),
         ),
-          GoRoute( 
-      path: '/cart',
-      name: 'cart',
-      builder: (context, state) => const CartScreen(),),
-
-      GoRoute( 
-        path: '/order-summary',
-        name: 'order-summary',
-        builder: (context, state) => const OrderSummaryScreen(),
+        GoRoute(
+          path: '/cart',
+          name: 'cart',
+          builder: (context, state) => const CartScreen(),
+        ),
+        GoRoute(
+          path: '/appointments',
+          name: 'appointments',
+          builder: (context, state) => const AppointmentsScreen(),
+        ),
+        GoRoute(
+          path: '/order-summary',
+          name: 'order-summary',
+          builder: (context, state) => const OrderSummaryScreen(),
         ),
         GoRoute(
           path: '/confirm-order',
           name: 'confirm-order',
           builder: (context, state) => const PurchaseConfirmationScreen(),
-          ),
+        ),
       ],
     ),
   ],
