@@ -96,7 +96,9 @@ class MainScaffold extends ConsumerWidget {
 
                     if (confirmed == true) {
                       await ref.read(authControllerProvider.notifier).logout();
-                      ref.invalidate(appointmentProvider);
+                      ref.invalidate(
+                        appointmentProvider,
+                      ); // Limpia turnos al cerrar sesión
                       context.go('/login');
                     }
                   },

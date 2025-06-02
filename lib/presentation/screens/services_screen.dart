@@ -28,9 +28,6 @@ class ServicesScreen extends ConsumerWidget {
               style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 hintText: 'Buscar servicio...',
-                hintStyle: const TextStyle(
-                  color: Color.fromARGB(255, 100, 100, 100),
-                ),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
