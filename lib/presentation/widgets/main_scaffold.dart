@@ -47,7 +47,10 @@ class MainScaffold extends ConsumerWidget {
                   fontSize: 29,
                   letterSpacing: 1.1,
                   fontStyle: FontStyle.italic,
-                  color: Colors.white,
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.white,
                   shadows: const [
                     Shadow(
                       offset: Offset(0, 1.5),
