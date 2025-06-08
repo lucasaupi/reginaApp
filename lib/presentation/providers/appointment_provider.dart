@@ -4,6 +4,8 @@ import 'package:regina_app/domain/appointment.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+final appointmentFinishedProvider = StateProvider<Appointment?>((ref) => null);
+
 class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   AppointmentNotifier(this.ref) : super([]) {
     // Escuchar cambios en el usuario y cargar turnos
@@ -21,42 +23,71 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   final Ref ref;
 
   Future<void> _loadAppointments(String userId) async {
+    final now = DateTime.now();
     final snapshot =
         await FirebaseFirestore.instance
             .collection('appointments')
             .where('userId', isEqualTo: userId)
+            .where('status', isEqualTo: 'active')
+            .orderBy('date', descending: false)
             .get();
 
-    state = snapshot.docs.map((doc) => Appointment.fromFirestore(doc)).toList();
+    final newState = <Appointment>[];
+
+    for (final doc in snapshot.docs) {
+      final appt = Appointment.fromFirestore(doc);
+
+      if (appt.date.isBefore(now)) {
+        await FirebaseFirestore.instance
+            .collection('appointments')
+            .doc(appt.id)
+            .update({'status': 'completed'});
+
+        ref.read(appointmentFinishedProvider.notifier).state =
+            appt.copyWith(status: 'completed');
+      } else {
+        newState.add(appt);
+      }
+    }
+    state = newState;
   }
 
   Future<void> add(Appointment appointment) async {
+    await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('serviceName', isEqualTo: appointment.serviceName)
+        .where('date', isEqualTo: Timestamp.fromDate(appointment.date))
+        .where('status', isEqualTo: 'active')
+        .get();
+
+    // Crear la cita con campos completos
     final docRef = await FirebaseFirestore.instance
         .collection('appointments')
-        .add(appointment.toMap());
+        .add({
+          ...appointment.toMap(),
+          'createdAt': Timestamp.now(),
+          'deletedAt': null,
+        });
 
-    final addedAppointment = appointment.copyWith(id: docRef.id);
+    final addedAppointment = appointment.copyWith(
+      id: docRef.id,
+      status: 'active',
+      createdAt: DateTime.now(),
+      deletedAt: null,
+    );
+
     state = [...state, addedAppointment];
   }
 
-  Future<void> remove(String id) async {
-    await FirebaseFirestore.instance
-        .collection('appointments')
-        .doc(id)
-        .delete();
+  Future<void> cancel(String id) async {
+    await FirebaseFirestore.instance.collection('appointments').doc(id).update({
+      'status': 'cancelled',
+      'deletedAt': Timestamp.now(),
+    });
+
+    // Quitar de la lista local:
     state = state.where((appt) => appt.id != id).toList();
   }
-
-  Future<void> clear() async {
-    for (var appt in state) {
-      await FirebaseFirestore.instance
-          .collection('appointments')
-          .doc(appt.id)
-          .delete();
-    }
-    state = [];
-  }
-
   int get total => state.length;
 }
 
