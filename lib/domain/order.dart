@@ -47,6 +47,18 @@ class PurchaseOrder {
       'status': status,
     };
   }
+   factory PurchaseOrder.fromMap(Map<String, dynamic> map) {
+    return PurchaseOrder(
+      id: map['id'] ?? '',
+      userId: map['userId'] ?? '',
+      items: (map['items'] as List<dynamic>)
+          .map((item) => CartItem.fromMap(item))
+          .toList(),
+      totalPrice: (map['totalPrice'] as num).toDouble(),
+      createdAt: (map['createdAt'] as Timestamp).toDate(),
+      status: map['status'] ?? 'Pendiente',
+    );
+  }
 
   
 }

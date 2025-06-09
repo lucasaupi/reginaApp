@@ -25,7 +25,8 @@ class MainScaffold extends ConsumerWidget {
 
         final tabs =
             userLoggedIn
-                ? allTabs.where((tab) => tab != '/login').toList()
+                ? allTabs.where((tab) => tab != '/login').toList() +
+                    ['/profile']
                 : allTabs;
 
         final String location = GoRouterState.of(context).uri.toString();
@@ -132,6 +133,11 @@ class MainScaffold extends ConsumerWidget {
                       return const BottomNavigationBarItem(
                         icon: Icon(Icons.account_circle_rounded),
                         label: 'Ingresar',
+                      );
+                    case '/profile':
+                      return const BottomNavigationBarItem(
+                        icon: Icon(Icons.account_circle),
+                        label: 'Perfil',
                       );
                     default:
                       return const BottomNavigationBarItem(

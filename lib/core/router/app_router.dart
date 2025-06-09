@@ -3,7 +3,9 @@ import 'package:regina_app/presentation/screens/home_screen.dart';
 import 'package:regina_app/presentation/screens/order_summary_screen.dart';
 import 'package:regina_app/presentation/screens/product_detail_screen.dart';
 import 'package:regina_app/presentation/screens/product_screen.dart';
+import 'package:regina_app/presentation/screens/profile_screen.dart';
 import 'package:regina_app/presentation/screens/purchase_confirmation_screen.dart';
+import 'package:regina_app/presentation/screens/purchase_summary_screen.dart';
 import 'package:regina_app/presentation/screens/service_detail_screen.dart';
 import 'package:regina_app/presentation/screens/services_screen.dart';
 import 'package:regina_app/presentation/screens/login_screen.dart';
@@ -75,6 +77,18 @@ final GoRouter appRouter = GoRouter(
           name: 'confirm-order',
           builder: (context, state) => const PurchaseConfirmationScreen(),
         ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
+          ),
+
+        GoRoute(
+          path: '/purchase_detail/:orderId',
+          name: 'purchase_detail',
+          builder: (context, state) => PurchaseDetailScreen(
+            orderId: state.pathParameters['orderId']!,
+            ),
+)
       ],
     ),
   ],

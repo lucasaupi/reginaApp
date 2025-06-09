@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:regina_app/presentation/providers/order_provider.dart';
+import 'package:regina_app/presentation/providers/user_orders_provider.dart';
 
-class OrderSummaryScreen extends ConsumerWidget {
-  const OrderSummaryScreen({super.key});
+class PurchaseDetailScreen extends ConsumerWidget {
+  final String orderId;
+
+  const PurchaseDetailScreen({super.key, required this.orderId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final orderAsync = ref.watch(orderProvider);
+    final ordersAsync = ref.watch(userOrdersProvider);
 
-    return orderAsync.when(
-      data: (order) {
-        if (order == null) {
-          return const Scaffold(
-            body: Center(
-              child: Text('No hay una orden reciente'),
-            ),
-          );
-        }
+    return ordersAsync.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        body: Center(child: Text('Error al cargar: $e')),
+      ),
+      data: (orders) {
+        final order = orders.firstWhere(
+          (o) => o.id == orderId,
+          orElse: () => throw Exception('Orden no encontrada'),
+        );
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Resumen de compra'),
+            title: Text('Resumen de compra'),
             leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.go('/'); 
-          },
-        ),
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.pop(),
+            ),
           ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -40,6 +44,8 @@ class OrderSummaryScreen extends ConsumerWidget {
                 Text('Estado: ${order.status}'),
                 const SizedBox(height: 8),
                 Text('Total: \$${order.totalPrice.toStringAsFixed(2)}'),
+                const SizedBox(height: 8),
+                Text('Fecha: ${order.createdAt?.toLocal().toString().split(' ').first ?? ''}'),
                 const Divider(height: 24),
                 const Text('Productos:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -49,33 +55,21 @@ class OrderSummaryScreen extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final item = order.items[index];
                       return ListTile(
+                        leading: item.product.imageUrl != null
+                            ? Image.network(item.product.imageUrl!, width: 50, height: 50, fit: BoxFit.cover)
+                            : const Icon(Icons.image),
                         title: Text(item.product.name),
                         subtitle: Text('Cantidad: ${item.quantity}'),
-                        trailing: Text(
-                          '\$${(item.product.price * item.quantity).toStringAsFixed(2)}',
-                        ),
+                        trailing: Text('\$${(item.product.price * item.quantity).toStringAsFixed(2)}'),
                       );
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
-                 const Text(
-                  '📍 Retiro de la compra:\nSolo con retiro en el local.\n\n🕒 Horarios:\nLunes a viernes de 9 a 18 hs.\nSábados de 9 a 13 hs.',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                
               ],
             ),
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (e, st) => Scaffold(
-        body: Center(child: Text('Error al cargar la orden: $e')),
-      ),
     );
-    
   }
 }
