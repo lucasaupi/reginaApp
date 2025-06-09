@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,8 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Carrito'),
+    
+  
        ),
       body: Column(
         children: [
