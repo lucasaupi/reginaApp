@@ -5,7 +5,7 @@ class Appointment {
   final String userId;
   final String serviceName;
   final DateTime date;
-  final String status; // "active", "cancelled"
+  final String status;
   final DateTime createdAt;
   final DateTime? deletedAt;
 

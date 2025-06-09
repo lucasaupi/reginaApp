@@ -8,11 +8,9 @@ final appointmentFinishedProvider = StateProvider<Appointment?>((ref) => null);
 
 class AppointmentNotifier extends StateNotifier<List<Appointment>> {
   AppointmentNotifier(this.ref) : super([]) {
-    // Escuchar cambios en el usuario y cargar turnos
     ref.listen<AsyncValue<User?>>(userProvider, (previous, next) async {
       final user = next.value;
       if (user == null) {
-        // Si se cerró sesión, limpiar los turnos
         state = [];
       } else {
         await _loadAppointments(user.uid);
@@ -60,7 +58,6 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
         .where('status', isEqualTo: 'active')
         .get();
 
-    // Crear la cita con campos completos
     final docRef = await FirebaseFirestore.instance
         .collection('appointments')
         .add({
@@ -85,7 +82,6 @@ class AppointmentNotifier extends StateNotifier<List<Appointment>> {
       'deletedAt': Timestamp.now(),
     });
 
-    // Quitar de la lista local:
     state = state.where((appt) => appt.id != id).toList();
   }
   int get total => state.length;
