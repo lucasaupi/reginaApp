@@ -66,7 +66,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    context.push('/login'); 
+                    context.push('/login');
                   },
                   child: const Text('Iniciar sesión'),
                 ),
@@ -81,10 +81,12 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
         .firstWhere((s) => s.id == widget.serviceId);
 
     final appointment = Appointment(
-      id: '', // Se completa luego con el ID generado
+      id: '',
       userId: user.uid,
       serviceName: service.name,
       date: _selectedSlot!,
+      createdAt: DateTime.now(),
+      deletedAt: null,
     );
 
     try {
@@ -114,7 +116,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
         context: context,
         builder:
             (_) => AlertDialog(
-              title: const Text('Error'),
+              title: const Text('Error al reservar'),
               content: Text('No se pudo reservar el turno: $e'),
               actions: [
                 TextButton(
@@ -132,7 +134,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     final textTheme = Theme.of(context).textTheme;
     final services = ref.watch(serviceProvider);
     final service = services.firstWhere((s) => s.id == widget.serviceId);
-    final slotsAsync = ref.watch(slotsProvider(service.id));
+    final slotsAsync = ref.watch(slotsProvider(service.name));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del servicio')),

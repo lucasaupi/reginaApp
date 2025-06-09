@@ -1,19 +1,75 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
-final slotsProvider = FutureProvider.family<List<DateTime>, String>((ref, serviceId) async {
-  // Simula un pequeño retraso como si fuera de red
-  await Future.delayed(const Duration(milliseconds: 300));
+import 'package:table_calendar/table_calendar.dart';
 
-  final now = DateTime.now();
-  final List<DateTime> slots = [];
+final slotsProvider = StateNotifierProvider.family<
+  SlotsNotifier,
+  AsyncValue<List<DateTime>>,
+  String
+>((ref, serviceId) => SlotsNotifier(serviceId));
 
-  // Generamos turnos genéricos para los próximos 7 días
-  for (int i = 0; i < 7; i++) {
-    final day = now.add(Duration(days: i));
-    for (int hour = 9; hour <= 17; hour += 2) {
-      slots.add(DateTime(day.year, day.month, day.day, hour));
+class SlotsNotifier extends StateNotifier<AsyncValue<List<DateTime>>> {
+  final String serviceName;
+  StreamSubscription? _subscription;
+
+  SlotsNotifier(this.serviceName) : super(const AsyncValue.loading()) {
+    _listenToSlots();
+  }
+
+  void _listenToSlots() {
+    try {
+      _subscription = FirebaseFirestore.instance
+          .collection('appointments')
+          .where('serviceName', isEqualTo: serviceName)
+          .where('status', isEqualTo: 'active')
+          .snapshots()
+          .listen(
+            (snapshot) {
+              final reservedSlots =
+                  snapshot.docs
+                      .map((doc) => (doc['date'] as Timestamp).toDate())
+                      .toList();
+
+              final now = DateTime.now();
+              final List<DateTime> slots = [];
+              for (int i = 0; i < 7; i++) {
+                final day = now.add(Duration(days: i));
+                for (int hour = 9; hour <= 17; hour += 2) {
+                  final slot = DateTime(day.year, day.month, day.day, hour);
+                  if (isSameDay(slot, now) && slot.isBefore(now)) {
+                    continue;
+                  }
+                  slots.add(slot);
+                }
+              }
+
+              final availableSlots =
+                  slots.where((slot) {
+                    return !reservedSlots.any(
+                      (reserved) =>
+                          reserved.year == slot.year &&
+                          reserved.month == slot.month &&
+                          reserved.day == slot.day &&
+                          reserved.hour == slot.hour,
+                    );
+                  }).toList();
+
+              state = AsyncValue.data(availableSlots);
+            },
+            onError: (error, stack) {
+              state = AsyncValue.error(error, stack);
+            },
+          );
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 
-  return slots;
-});
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
