@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:regina_app/domain/cart_item.dart';
 import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/presentation/providers/cart_provider.dart';
+import 'package:regina_app/presentation/providers/quantity_provider.dart';
 import 'package:regina_app/presentation/providers/search_provider.dart';
 
 class ProductScreen extends ConsumerWidget {
@@ -12,6 +14,14 @@ class ProductScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filteredProducts = ref.watch(filteredProductsProvider);
     final searchByName = ref.watch(searchByNameProvider);
+
+    ref.listen<List<CartItem>>(cartProvider, (previous, next) {
+      final quantityNotifier = ref.read(quantityProvider.notifier);
+      quantityNotifier.resetAll();
+      for (final item in next) {
+        quantityNotifier.setQuantity(item.product.id, item.quantity);
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -64,31 +74,6 @@ class ProductScreen extends ConsumerWidget {
     );
   }
 }
-
-class QuantityNotifier extends StateNotifier<Map<String, int>> {
-  QuantityNotifier() : super({});
-
-  void increment(String productId) {
-    final current = state[productId] ?? 0;
-    state = {...state, productId: current + 1};
-  }
-
-  void decrement(String productId) {
-    final current = state[productId] ?? 0;
-    if (current > 1) {
-      state = {...state, productId: current - 1};
-    } else {
-      final newState = Map<String, int>.from(state);
-      newState.remove(productId);
-      state = newState;
-    }
-  }
-}
-
-final quantityProvider =
-    StateNotifierProvider<QuantityNotifier, Map<String, int>>((ref) {
-      return QuantityNotifier();
-    });
 
 class _ProductListView extends StatelessWidget {
   const _ProductListView({super.key, required this.products});
@@ -158,9 +143,13 @@ class _ProductItemView extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
                       onPressed: () {
-                        ref
-                            .read(quantityProvider.notifier)
-                            .decrement(product.id);
+                        if (quantity == 1) {
+                          ref.read(quantityProvider.notifier).reset(product.id);
+                        } else {
+                          ref
+                              .read(quantityProvider.notifier)
+                              .decrement(product.id);
+                        }
                         cartNotifier.removeOneFromCart(product);
                       },
                     ),

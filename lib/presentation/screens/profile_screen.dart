@@ -6,6 +6,7 @@ import 'package:regina_app/domain/order.dart';
 import 'package:regina_app/presentation/providers/user_orders_provider.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:regina_app/presentation/providers/user_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -31,14 +32,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final myOrders = ref.watch(userOrdersProvider);
     final user = FirebaseAuth.instance.currentUser;
+    final userNameAsync = ref.watch(userNameProvider);
 
     if (user == null) {
       return const Scaffold(
         body: Center(child: Text('Debés iniciar sesión para ver tu perfil')),
       );
     }
-    //hay que cambiar x un metodo q busque el nombre en la coleccion x su uid
-    final displayName = user.displayName ?? user.email ?? 'Usuario';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mi Perfil')),
@@ -47,10 +47,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Hola, $displayName 👋',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            userNameAsync.when(
+              data: (name) {
+                final displayName =
+                    (name != null && name.isNotEmpty)
+                        ? name
+                        : (user.email ?? 'Usuario');
+                return Text(
+                  'Hola, $displayName 👋',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+              loading: () => const CircularProgressIndicator(),
+              error: (_, __) => Text('Hola, ${user.email ?? 'Usuario'} 👋'),
             ),
+
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -65,7 +79,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 10),
             SizedBox(
-              
               height: 200,
               child: myOrders.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -88,7 +101,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 },
               ),
             ),
-            
 
             const SizedBox(height: 20),
             const Text(
@@ -146,5 +158,3 @@ class purchaseCard extends StatelessWidget {
     );
   }
 }
-
-

@@ -1,11 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/product.dart';
-import 'package:regina_app/presentation/providers/auth_controller_provider.dart';
 import 'package:regina_app/presentation/providers/cart_provider.dart';
-import 'package:regina_app/presentation/providers/order_provider.dart';
+import 'package:regina_app/presentation/providers/quantity_provider.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -14,17 +12,10 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
-  
-    
-
-    
     final total = ref.watch(cartProvider.notifier).total;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Carrito'),
-    
-  
-       ),
+      appBar: AppBar(title: const Text('Carrito')),
       body: Column(
         children: [
           Expanded(
@@ -34,34 +25,33 @@ class CartScreen extends ConsumerWidget {
                     : ListView.builder(
                       itemCount: cart.length,
                       itemBuilder: (context, index) {
-                          final item = cart[index];
+                        final item = cart[index];
                         final product = item.product;
                         final quantity = item.quantity;
 
-                        return itemCartCard(product: product,
-                         quantity: quantity,
-                          cartNotifier: cartNotifier
-                          );
+                        return itemCartCard(
+                          product: product,
+                          quantity: quantity,
+                          cartNotifier: cartNotifier,
+                        );
                       },
                     ),
-                    
           ),
 
           ElevatedButton(
-             onPressed: () {
-               final cart = ref.read(cartProvider);
-               if (cart.isEmpty) {
+            onPressed: () {
+              final cart = ref.read(cartProvider);
+              if (cart.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                   const SnackBar(content: Text('El carrito está vacío.')),
-                   );
-                   return;
-                   }
-                   context.push('/confirm-order');
-                   },
-                   child: const Text('Comprar'),
-                   ),
+                  const SnackBar(content: Text('El carrito está vacío.')),
+                );
+                return;
+              }
+              context.push('/confirm-order');
+            },
+            child: const Text('Comprar'),
+          ),
 
-          
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
             child: Column(
@@ -107,7 +97,7 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-class itemCartCard extends StatelessWidget {
+class itemCartCard extends ConsumerWidget {
   const itemCartCard({
     super.key,
     required this.product,
@@ -120,8 +110,7 @@ class itemCartCard extends StatelessWidget {
   final CartNotifier cartNotifier;
 
   @override
-  
-   Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Card(
@@ -130,35 +119,34 @@ class itemCartCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-            
               product.imageUrl != null
                   ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        product.imageUrl!,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
-                    )
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      product.imageUrl!,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  )
                   : const Icon(Icons.image_not_supported, size: 60),
-
               const SizedBox(width: 12),
-
-              
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      product.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 4),
                     Text('Precio: \$${product.price.toStringAsFixed(2)}'),
-                    Text('Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}'),
+                    Text(
+                      'Subtotal: \$${(product.price * quantity).toStringAsFixed(2)}',
+                    ),
                   ],
                 ),
               ),
-
-              
               Column(
                 children: [
                   Row(
@@ -168,6 +156,9 @@ class itemCartCard extends StatelessWidget {
                         icon: const Icon(Icons.remove),
                         onPressed: () {
                           cartNotifier.removeOneFromCart(product);
+                          ref
+                              .read(quantityProvider.notifier)
+                              .decrement(product.id);
                         },
                       ),
                       Text('$quantity'),
@@ -175,6 +166,9 @@ class itemCartCard extends StatelessWidget {
                         icon: const Icon(Icons.add),
                         onPressed: () {
                           cartNotifier.addToCart(product, quantity: 1);
+                          ref
+                              .read(quantityProvider.notifier)
+                              .increment(product.id);
                         },
                       ),
                     ],
@@ -184,23 +178,29 @@ class itemCartCard extends StatelessWidget {
                     onPressed: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Eliminar producto'),
-                          content: Text('¿Querés eliminar "${product.name}" del carrito?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('Cancelar'),
+                        builder:
+                            (context) => AlertDialog(
+                              title: const Text('Eliminar producto'),
+                              content: Text(
+                                '¿Querés eliminar "${product.name}" del carrito?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.of(context).pop(false),
+                                  child: const Text('Cancelar'),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.of(context).pop(true),
+                                  child: const Text('Eliminar'),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text('Eliminar'),
-                            ),
-                          ],
-                        ),
                       );
                       if (confirm == true) {
                         cartNotifier.removeAllOf(product);
+                        ref.read(quantityProvider.notifier).reset(product.id);
                       }
                     },
                   ),

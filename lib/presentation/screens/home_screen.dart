@@ -22,7 +22,7 @@ class HomeScreen extends ConsumerWidget {
 
     final saludo = userAsync.when(
       data: (user) {
-        if (user != null && user.emailVerified) {
+        if (user != null) {
           return userNameAsync.when(
             data:
                 (nombre) =>
