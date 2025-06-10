@@ -4,12 +4,12 @@ class QuantityNotifier extends StateNotifier<Map<String, int>> {
   QuantityNotifier() : super({});
 
   void increment(String productId) {
-    final current = state[productId] ?? 1;
+    final current = state[productId] ?? 0;
     state = {...state, productId: current + 1};
   }
 
   void decrement(String productId) {
-    final current = state[productId] ?? 1;
+    final current = state[productId] ?? 0;
     if (current > 1) {
       state = {...state, productId: current - 1};
     }
@@ -19,6 +19,18 @@ class QuantityNotifier extends StateNotifier<Map<String, int>> {
     final newState = Map<String, int>.from(state);
     newState.remove(productId);
     state = newState;
+  }
+
+  void setQuantity(String productId, int quantity) {
+    if (quantity <= 0) {
+      reset(productId);
+    } else {
+      state = {...state, productId: quantity};
+    }
+  }
+
+  void resetAll() {
+    state = {};
   }
 }
 

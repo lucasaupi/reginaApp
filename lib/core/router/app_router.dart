@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:regina_app/presentation/providers/quantity_provider.dart';
 import 'package:regina_app/presentation/screens/home_screen.dart';
 import 'package:regina_app/presentation/screens/order_summary_screen.dart';
 import 'package:regina_app/presentation/screens/product_detail_screen.dart';
@@ -29,7 +31,14 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/products',
           name: 'products',
-          builder: (context, state) => ProductScreen(),
+          builder: (context, state) {
+            return ProviderScope(
+              overrides: [
+                quantityProvider.overrideWith((ref) => QuantityNotifier()),
+              ],
+              child: const ProductScreen(),
+            );
+          },
         ),
         GoRoute(
           path: '/product_detail/:productId',
@@ -80,15 +89,16 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
-          ),
+        ),
 
         GoRoute(
           path: '/purchase_detail/:orderId',
           name: 'purchase_detail',
-          builder: (context, state) => PurchaseDetailScreen(
-            orderId: state.pathParameters['orderId']!,
-            ),
-)
+          builder:
+              (context, state) => PurchaseDetailScreen(
+                orderId: state.pathParameters['orderId']!,
+              ),
+        ),
       ],
     ),
   ],
