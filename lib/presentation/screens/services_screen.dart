@@ -4,17 +4,30 @@ import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/service.dart';
 import 'package:regina_app/presentation/providers/search_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
+import 'package:regina_app/presentation/providers/storage_provider.dart';
 import 'package:regina_app/presentation/widgets/appointment_icon_button.dart';
 
-class ServicesScreen extends ConsumerWidget {
-  ServicesScreen({super.key});
+class ServicesScreen extends ConsumerStatefulWidget {
+  const ServicesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final services = ref.watch(serviceProvider);
+  ConsumerState<ServicesScreen> createState() => _ServicesScreenState();
+}
 
+class _ServicesScreenState extends ConsumerState<ServicesScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.read(serviceProvider.notifier).getAllServices();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final services = ref.watch(serviceProvider);
     final filteredServices = ref.watch(filteredServicesProvider);
-    // Future.microtask(() => ref.read(serviceProvider.notifier).getAllServices());
 
     return Scaffold(
       appBar: AppBar(
@@ -38,20 +51,19 @@ class ServicesScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onChanged:
-                  (value) =>
-                      ref.read(searchQueryProvider.notifier).state = value,
+              onChanged: (value) =>
+                  ref.read(searchQueryProvider.notifier).state = value,
             ),
           ),
         ),
       ),
-      body:
-          services.isEmpty
-              ? const Center(child: Text("No hay servicios"))
-              : _ServiceListView(services: filteredServices),
+      body: services.isEmpty
+          ? const Center(child: Text("No hay servicios"))
+          : _ServiceListView(services: filteredServices),
     );
   }
 }
+
 
 class _ServiceListView extends StatelessWidget {
   const _ServiceListView({super.key, required this.services});
@@ -69,34 +81,49 @@ class _ServiceListView extends StatelessWidget {
   }
 }
 
-class _ServiceItemView extends StatelessWidget {
+class _ServiceItemView extends ConsumerWidget {
   const _ServiceItemView({super.key, required this.service});
 
   final Service service;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () => context.push('/service_detail/${service.id}'),
       child: Card(
         child: ListTile(
           trailing: const Icon(Icons.chevron_right),
-          leading:
-              service.imageUrl != null
-                  ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      service.imageUrl!,
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: FutureBuilder<String>(
+                future: ref.read(storageProvider).getImagePath(
+                      folder: 'services',
+                      fileName: service.imagePath ?? '',
+                    ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                        child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2)));
+                  } else if (snapshot.hasError || !snapshot.hasData) {
+                    return const Icon(Icons.calendar_today);
+                  } else {
+                    return Image.network(
+                      snapshot.data!,
                       width: 50,
                       height: 50,
                       fit: BoxFit.cover,
-                    ),
-                  )
-                  : const SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: Icon(Icons.calendar_today),
-                  ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ),
           title: Text(service.name),
           subtitle: Text(service.description),
         ),

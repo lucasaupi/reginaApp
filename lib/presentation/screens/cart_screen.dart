@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/presentation/providers/cart_provider.dart';
 import 'package:regina_app/presentation/providers/quantity_provider.dart';
+import 'package:regina_app/presentation/providers/image_path_provider.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -111,6 +112,9 @@ class itemCartCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final imageAsync = ref.watch(
+      imagePathProvider(('products', product.imagePath ?? '')),
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Card(
@@ -119,17 +123,28 @@ class itemCartCard extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              product.imageUrl != null
-                  ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      product.imageUrl!,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                  : const Icon(Icons.image_not_supported, size: 60),
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: imageAsync.when(
+                  loading:
+                      () => const Center(child: CircularProgressIndicator()),
+                  error:
+                      (_, __) =>
+                          const Icon(Icons.image_not_supported, size: 60),
+                  data:
+                      (url) => ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          url,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                ),
+              ),
+
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
