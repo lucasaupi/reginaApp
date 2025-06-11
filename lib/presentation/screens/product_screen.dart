@@ -4,18 +4,26 @@ import 'package:go_router/go_router.dart';
 import 'package:regina_app/domain/cart_item.dart';
 import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/presentation/providers/cart_provider.dart';
+import 'package:regina_app/presentation/providers/image_path_provider.dart';
 import 'package:regina_app/presentation/providers/quantity_provider.dart';
 import 'package:regina_app/presentation/providers/search_provider.dart';
+import 'package:regina_app/presentation/providers/product_provider.dart';
+import 'package:regina_app/presentation/providers/storage_provider.dart';
 
-class ProductScreen extends ConsumerWidget {
+class ProductScreen extends ConsumerStatefulWidget {
   const ProductScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final filteredProducts = ref.watch(filteredProductsProvider);
-    final searchByName = ref.watch(searchByNameProvider);
+  ConsumerState<ProductScreen> createState() => _ProductScreenState();
+}
 
-    ref.listen<List<CartItem>>(cartProvider, (previous, next) {
+class _ProductScreenState extends ConsumerState<ProductScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Escucha manual del carrito para sincronizar cantidades
+    ref.listenManual<List<CartItem>>(cartProvider, (previous, next) {
       final quantityNotifier = ref.read(quantityProvider.notifier);
       quantityNotifier.resetAll();
       for (final item in next) {
@@ -23,15 +31,22 @@ class ProductScreen extends ConsumerWidget {
       }
     });
 
+    // Carga inicial de productos
+    Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final products = ref.watch(productProvider);
+    final filteredProducts = ref.watch(filteredProductsProvider);
+    final searchByName = ref.watch(searchByNameProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos'),
         actions: [
           IconButton(
             icon: Icon(searchByName ? Icons.description : Icons.text_fields),
-            onHover:
-                (value) =>
-                    ref.read(searchByNameProvider.notifier).state = value,
             tooltip:
                 searchByName ? 'Buscar por descripción' : 'Buscar por nombre',
             onPressed: () {
@@ -68,8 +83,8 @@ class ProductScreen extends ConsumerWidget {
         ),
       ),
       body:
-          filteredProducts.isEmpty
-              ? const Center(child: Text("No hay productos"))
+          products.isEmpty
+              ? const Center(child: CircularProgressIndicator())
               : _ProductListView(products: filteredProducts),
     );
   }
@@ -90,7 +105,6 @@ class _ProductListView extends StatelessWidget {
     );
   }
 }
-
 class _ProductItemView extends ConsumerWidget {
   const _ProductItemView({super.key, required this.product});
 
@@ -102,69 +116,73 @@ class _ProductItemView extends ConsumerWidget {
     final quantityMap = ref.watch(quantityProvider);
     final quantity = quantityMap[product.id] ?? 0;
 
+    final imageAsync = ref.watch(
+      imagePathProvider(('products', product.imagePath ?? '')),
+    );
+
     return Card(
       child: ListTile(
         onTap: () => context.push('/product_detail/${product.id}'),
-        leading:
-            product.imageUrl != null
-                ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    product.imageUrl!,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                )
-                : const SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: Icon(Icons.list_alt_rounded),
-                ),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: imageAsync.when(
+            data: (url) => Image.network(
+              url,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+            loading: () => const SizedBox(
+              width: 50,
+              height: 50,
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            ),
+            error: (_, __) => const SizedBox(
+              width: 50,
+              height: 50,
+              child: Icon(Icons.list_alt_rounded),
+            ),
+          ),
+        ),
         title: Text(product.name),
         subtitle: Text(product.description),
-        trailing:
-            quantity == 0
-                ? IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () {
-                    ref.read(quantityProvider.notifier).increment(product.id);
-                    cartNotifier.addToCart(product, quantity: 1);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${product.name} agregado al carrito'),
-                      ),
-                    );
-                  },
-                )
-                : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
-                      onPressed: () {
-                        if (quantity == 1) {
-                          ref.read(quantityProvider.notifier).reset(product.id);
-                        } else {
-                          ref
-                              .read(quantityProvider.notifier)
-                              .decrement(product.id);
-                        }
-                        cartNotifier.removeOneFromCart(product);
-                      },
+        trailing: quantity == 0
+            ? IconButton(
+                icon: const Icon(Icons.add_circle_outline),
+                onPressed: () {
+                  ref.read(quantityProvider.notifier).increment(product.id);
+                  cartNotifier.addToCart(product, quantity: 1);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${product.name} agregado al carrito'),
                     ),
-                    Text('$quantity'),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: () {
-                        ref
-                            .read(quantityProvider.notifier)
-                            .increment(product.id);
-                        cartNotifier.addToCart(product, quantity: 1);
-                      },
-                    ),
-                  ],
-                ),
+                  );
+                },
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    onPressed: () {
+                      if (quantity == 1) {
+                        ref.read(quantityProvider.notifier).reset(product.id);
+                      } else {
+                        ref.read(quantityProvider.notifier).decrement(product.id);
+                      }
+                      cartNotifier.removeOneFromCart(product);
+                    },
+                  ),
+                  Text('$quantity'),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () {
+                      ref.read(quantityProvider.notifier).increment(product.id);
+                      cartNotifier.addToCart(product, quantity: 1);
+                    },
+                  ),
+                ],
+              ),
       ),
     );
   }

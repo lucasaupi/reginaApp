@@ -5,7 +5,7 @@ class Product {
   String name;
   String description;
   int price;
-  String? imageUrl;
+  String? imagePath;
   DateTime? createdAt;
   DateTime? deletedAt;
   String status;
@@ -15,7 +15,7 @@ class Product {
     required this.name,
     required this.description,
     required this.price,
-    this.imageUrl,
+    this.imagePath,
     this.createdAt,
     this.deletedAt,
     this.status = 'active',
@@ -31,7 +31,7 @@ class Product {
       name: data['name'] ?? '',
       description: data['description'] ?? '',
       price: data['price'] ?? 0,
-      imageUrl: data['imageUrl'],
+      imagePath: data['imagePath'],
       status: data['status'] ?? 'active',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       deletedAt: (data['deletedAt'] as Timestamp?)?.toDate(),
@@ -43,7 +43,7 @@ class Product {
       'name': name,
       'description': description,
       'price': price,
-      'imageUrl': imageUrl,
+      'imagePath': imagePath,
       'status': status,
       'createdAt': createdAt,
       'deletedAt': deletedAt,

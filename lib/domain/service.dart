@@ -7,7 +7,7 @@ class Service {
   int price;
   String times;
   int duration;
-  String? imageUrl;
+  String? imagePath;
   String status;
   DateTime? createdAt;
   DateTime? deletedAt;
@@ -19,7 +19,7 @@ class Service {
     required this.price,
     required this.times,
     required this.duration,
-    this.imageUrl,
+    this.imagePath,
     this.status = 'active',
     this.createdAt,
     this.deletedAt,
@@ -37,7 +37,7 @@ class Service {
       price: data['price'] ?? 0,
       times: data['times'] ?? '',
       duration: data['duration'] ?? 60,
-      imageUrl: data['imageUrl'],
+      imagePath: data['imagePath'],
       status: data['status'] ?? 'active',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       deletedAt: (data['deletedAt'] as Timestamp?)?.toDate(),
@@ -51,7 +51,7 @@ class Service {
       'price': price,
       'times': times,
       'duration': duration,
-      'imageUrl': imageUrl,
+      'imagePath': imagePath,
       'status': status,
       'createdAt': createdAt,
       'deletedAt': deletedAt,

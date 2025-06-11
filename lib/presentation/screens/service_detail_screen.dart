@@ -9,6 +9,7 @@ import 'package:regina_app/presentation/providers/slots_provider.dart';
 import 'package:regina_app/presentation/providers/appointment_provider.dart';
 import 'package:regina_app/domain/appointment.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
+import 'package:regina_app/presentation/providers/image_path_provider.dart';
 
 class ServiceDetailScreen extends ConsumerStatefulWidget {
   final String serviceId;
@@ -135,6 +136,9 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     final services = ref.watch(serviceProvider);
     final service = services.firstWhere((s) => s.id == widget.serviceId);
     final slotsAsync = ref.watch(slotsProvider(service.name));
+    final imageAsync = ref.watch(
+      imagePathProvider(('services', service.imagePath ?? '')),
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del servicio')),
@@ -142,11 +146,20 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            if (service.imageUrl != null)
-              ClipRRect(
+            imageAsync.when(
+              data: (url) => ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(service.imageUrl!, height: 180),
+                child: Image.network(url, height: 180, fit: BoxFit.cover),
               ),
+              loading: () => const SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (_, __) => const SizedBox(
+                height: 180,
+                child: Icon(Icons.image_not_supported),
+              ),
+            ),
             const SizedBox(height: 12),
             Text(service.name, style: textTheme.titleLarge),
             Text(service.description, style: textTheme.bodyMedium),

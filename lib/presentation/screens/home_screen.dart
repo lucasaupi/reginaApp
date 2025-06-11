@@ -5,16 +5,29 @@ import 'package:regina_app/domain/product.dart';
 import 'package:regina_app/domain/service.dart';
 import 'package:regina_app/presentation/providers/product_provider.dart';
 import 'package:regina_app/presentation/providers/service_provider.dart';
+import 'package:regina_app/presentation/providers/storage_provider.dart';
 import 'package:regina_app/presentation/providers/user_provider.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
-    Future.microtask(() => ref.read(serviceProvider.notifier).getAllServices());
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.read(productProvider.notifier).getAllProducts();
+      ref.read(serviceProvider.notifier).getAllServices();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final products = ref.watch(productProvider);
     final services = ref.watch(serviceProvider);
     final userAsync = ref.watch(userProvider);
@@ -122,7 +135,11 @@ class _HorizontalProductList extends StatelessWidget {
           final product = products[index];
           return GestureDetector(
             onTap: () => context.push('/product_detail/${product.id}'),
-            child: _SquareCard(imageUrl: product.imageUrl, title: product.name),
+            child: _SquareCard(
+              folder: 'products',
+              imagePath: product.imagePath ?? '',
+              title: product.name,
+            ),
           );
         },
       ),
@@ -147,7 +164,11 @@ class _HorizontalServiceList extends StatelessWidget {
           final service = services[index];
           return GestureDetector(
             onTap: () => context.push('/service_detail/${service.id}'),
-            child: _SquareCard(imageUrl: service.imageUrl, title: service.name),
+            child: _SquareCard(
+              folder: 'services',
+              imagePath: service.imagePath ?? '',
+              title: service.name,
+            ),
           );
         },
       ),
@@ -156,10 +177,16 @@ class _HorizontalServiceList extends StatelessWidget {
 }
 
 class _SquareCard extends StatelessWidget {
-  final String? imageUrl;
+  final String folder;
+  final String imagePath;
   final String title;
 
-  const _SquareCard({super.key, required this.imageUrl, required this.title});
+  const _SquareCard({
+    super.key,
+    required this.folder,
+    required this.imagePath,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -173,13 +200,30 @@ class _SquareCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child:
-                  imageUrl != null
-                      ? Image.network(imageUrl!, fit: BoxFit.cover)
-                      : Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image_not_supported, size: 40),
-                      ),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  return FutureBuilder<String>(
+                    future: ref
+                        .read(storageProvider)
+                        .getImagePath(folder: folder, fileName: imagePath),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError || !snapshot.hasData) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            size: 40,
+                          ),
+                        );
+                      } else {
+                        return Image.network(snapshot.data!, fit: BoxFit.cover);
+                      }
+                    },
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8),
