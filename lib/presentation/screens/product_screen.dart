@@ -8,7 +8,6 @@ import 'package:regina_app/presentation/providers/image_path_provider.dart';
 import 'package:regina_app/presentation/providers/quantity_provider.dart';
 import 'package:regina_app/presentation/providers/search_provider.dart';
 import 'package:regina_app/presentation/providers/product_provider.dart';
-import 'package:regina_app/presentation/providers/storage_provider.dart';
 
 class ProductScreen extends ConsumerStatefulWidget {
   const ProductScreen({super.key});
@@ -22,16 +21,14 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   void initState() {
     super.initState();
 
-    // Escucha manual del carrito para sincronizar cantidades
-    ref.listenManual<List<CartItem>>(cartProvider, (previous, next) {
-      final quantityNotifier = ref.read(quantityProvider.notifier);
-      quantityNotifier.resetAll();
-      for (final item in next) {
-        quantityNotifier.setQuantity(item.product.id, item.quantity);
-      }
+    ref.listenManual<List<CartItem>>(cartProvider, (_, next) {
+      final newState = {
+        for (final item in next)
+          if (item.quantity > 0) item.product.id: item.quantity,
+      };
+      ref.read(quantityProvider.notifier).setAll(newState);
     });
 
-    // Carga inicial de productos
     Future.microtask(() => ref.read(productProvider.notifier).getAllProducts());
   }
 
@@ -105,6 +102,7 @@ class _ProductListView extends StatelessWidget {
     );
   }
 }
+
 class _ProductItemView extends ConsumerWidget {
   const _ProductItemView({super.key, required this.product});
 
@@ -126,63 +124,73 @@ class _ProductItemView extends ConsumerWidget {
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: imageAsync.when(
-            data: (url) => Image.network(
-              url,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            ),
-            loading: () => const SizedBox(
-              width: 50,
-              height: 50,
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-            ),
-            error: (_, __) => const SizedBox(
-              width: 50,
-              height: 50,
-              child: Icon(Icons.list_alt_rounded),
-            ),
+            data:
+                (url) => Image.network(
+                  url,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
+            loading:
+                () => const SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+            error:
+                (_, __) => const SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: Icon(Icons.list_alt_rounded),
+                ),
           ),
         ),
         title: Text(product.name),
         subtitle: Text(product.description),
-        trailing: quantity == 0
-            ? IconButton(
-                icon: const Icon(Icons.add_circle_outline),
-                onPressed: () {
-                  ref.read(quantityProvider.notifier).increment(product.id);
-                  cartNotifier.addToCart(product, quantity: 1);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${product.name} agregado al carrito'),
+        trailing:
+            quantity == 0
+                ? IconButton(
+                  icon: const Icon(Icons.add_circle_outline),
+                  onPressed: () {
+                    ref.read(quantityProvider.notifier).increment(product.id);
+                    cartNotifier.addToCart(product, quantity: 1);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product.name} agregado al carrito'),
+                      ),
+                    );
+                  },
+                )
+                : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () {
+                        if (quantity == 1) {
+                          ref.read(quantityProvider.notifier).reset(product.id);
+                        } else {
+                          ref
+                              .read(quantityProvider.notifier)
+                              .decrement(product.id);
+                        }
+                        cartNotifier.removeOneFromCart(product);
+                      },
                     ),
-                  );
-                },
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: () {
-                      if (quantity == 1) {
-                        ref.read(quantityProvider.notifier).reset(product.id);
-                      } else {
-                        ref.read(quantityProvider.notifier).decrement(product.id);
-                      }
-                      cartNotifier.removeOneFromCart(product);
-                    },
-                  ),
-                  Text('$quantity'),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed: () {
-                      ref.read(quantityProvider.notifier).increment(product.id);
-                      cartNotifier.addToCart(product, quantity: 1);
-                    },
-                  ),
-                ],
-              ),
+                    Text('$quantity'),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () {
+                        ref
+                            .read(quantityProvider.notifier)
+                            .increment(product.id);
+                        cartNotifier.addToCart(product, quantity: 1);
+                      },
+                    ),
+                  ],
+                ),
       ),
     );
   }
