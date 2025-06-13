@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class QuantityNotifier extends StateNotifier<Map<String, int>> {
   QuantityNotifier() : super({});
 
+  void setAll(Map<String, int> quantities) {
+    state = quantities;
+  }
+
   void increment(String productId) {
     final current = state[productId] ?? 0;
     state = {...state, productId: current + 1};
