@@ -84,7 +84,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     final appointment = Appointment(
       id: '',
       userId: user.uid,
-      serviceName: service.name,
+      serviceId: service.id,
       date: _selectedSlot!,
       createdAt: DateTime.now(),
       deletedAt: null,
@@ -93,6 +93,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     try {
       final notifier = ref.read(appointmentProvider.notifier);
       await notifier.add(appointment);
+      final confirmSlot = _selectedSlot!;
 
       if (!mounted) return;
       showDialog(
@@ -101,11 +102,16 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
             (_) => AlertDialog(
               title: const Text('Reserva confirmada'),
               content: Text(
-                'Turno reservado para el ${DateFormat('EEEE d MMMM', 'es').format(_selectedSlot!)} a las ${DateFormat('HH:mm').format(_selectedSlot!)}.',
+                'Turno reservado para el ${DateFormat('EEEE d MMMM', 'es').format(confirmSlot)} a las ${DateFormat('HH:mm').format(confirmSlot)}.',
               ),
               actions: [
                 TextButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () {
+                    context.pop();
+                    setState(() {
+                      _selectedSlot = null;
+                    });
+                  },
                   child: const Text('Aceptar'),
                 ),
               ],
@@ -135,7 +141,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     final textTheme = Theme.of(context).textTheme;
     final services = ref.watch(serviceProvider);
     final service = services.firstWhere((s) => s.id == widget.serviceId);
-    final slotsAsync = ref.watch(slotsProvider(service.name));
+    final slotsAsync = ref.watch(slotsProvider(service.id));
     final imageAsync = ref.watch(
       imagePathProvider(('services', service.imagePath ?? '')),
     );
