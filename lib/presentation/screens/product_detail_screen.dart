@@ -38,9 +38,6 @@ class ProductDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalle del producto'),
-        actions: const [CartIconButton()],
-        foregroundColor: primaryColor,
-        elevation: 1,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -52,8 +49,7 @@ class ProductDetailScreen extends ConsumerWidget {
               child: imageAsync.when(
                 data: (url) => Image.network(
                   url,
-                  height: 280,
-                  width: double.infinity,
+                  height: 200,
                   fit: BoxFit.cover,
                 ),
                 loading: () => SizedBox(
