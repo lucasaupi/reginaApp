@@ -63,24 +63,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final state = ref.watch(authControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Iniciar sesión'), centerTitle: true),
+      backgroundColor: const Color(0xFFF6F8FC),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(
           key: _formKey,
           child: ListView(
             shrinkWrap: true,
             children: [
+              const SizedBox(height: 16),
               Image.asset(
                 'assets/images/regina_app_logo.png',
-                width: 300,
-                height: 250,
+                width: 220,
+                height: 180,
               ),
               const SizedBox(height: 32),
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(
                   labelText: 'Correo electrónico',
+                  border: OutlineInputBorder(),
                 ),
                 validator: (val) {
                   if (val == null || val.isEmpty) {
@@ -89,11 +92,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   final emailRegex = RegExp(
                     r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                   );
-
                   if (!emailRegex.hasMatch(val)) {
                     return 'Ingrese un correo válido';
                   }
-
                   return null;
                 },
               ),
@@ -101,16 +102,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               TextFormField(
                 controller: passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña',
+                  border: OutlineInputBorder(),
+                ),
                 validator:
                     (val) =>
                         val == null || val.length < 6
                             ? 'Mínimo 6 caracteres'
                             : null,
               ),
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+              const SizedBox(height: 12),
+              Center(
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -127,34 +130,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: Colors.blue,
                       fontWeight: FontWeight.w500,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
 
+              const SizedBox(height: 24),
               state.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                    onPressed: _login,
-                    child: const Text("Iniciar sesión"),
-                  ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("¿No tenés cuenta?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const RegisterScreen(),
+                  : SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    },
-                    child: const Text("Crear cuenta"),
+                      ),
+                      child: const Text(
+                        "Iniciar sesión",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
                   ),
-                ],
+              const SizedBox(height: 24),
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("¿No tenés cuenta?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text("Crear cuenta"),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

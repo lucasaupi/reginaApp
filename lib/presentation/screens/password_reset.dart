@@ -44,22 +44,24 @@ class _PasswordRecoveryScreenState
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Correo Electrónico',
+                  labelText: 'Correo electrónico',
+                  border: OutlineInputBorder(),
                 ),
                 validator: (val) {
                   if (val == null || val.isEmpty) return 'Ingrese su correo';
                   final emailRegex = RegExp(
                     r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                   );
-                  if (!emailRegex.hasMatch(val))
+                  if (!emailRegex.hasMatch(val)) {
                     return 'Ingrese un correo válido';
+                  }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _sendRecoveryEmail,
-                child: const Text('Enviar email de recuperación'),
+                child: const Text('Enviar correo de recuperación'),
               ),
             ],
           ),
