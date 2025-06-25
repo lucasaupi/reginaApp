@@ -157,7 +157,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                 data:
                     (url) => ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(url, height: 180, fit: BoxFit.cover),
+                      child: Image.network(url, height: 140, fit: BoxFit.cover),
                     ),
                 loading:
                     () => const SizedBox(

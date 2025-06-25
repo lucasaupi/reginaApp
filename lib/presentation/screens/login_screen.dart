@@ -73,14 +73,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               Image.asset(
                 'assets/images/regina_app_logo.png',
-                width: 350,
-                height: 300,
+                width: 300,
+                height: 250,
               ),
               const SizedBox(height: 32),
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Correo Electrónico',
+                  labelText: 'Correo electrónico',
                 ),
                 validator: (val) {
                   if (val == null || val.isEmpty) {
