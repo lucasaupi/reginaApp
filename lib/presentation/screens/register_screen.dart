@@ -100,13 +100,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               TextFormField(
                 controller: _firstNameController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: const InputDecoration(
+                  labelText: 'Nombre',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (val) => validateName(val, 'Nombre'),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _lastNameController,
-                decoration: const InputDecoration(labelText: 'Apellido'),
+                decoration: const InputDecoration(
+                  labelText: 'Apellido',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (val) => validateName(val, 'Apellido'),
               ),
               const SizedBox(height: 16),
@@ -114,6 +120,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _emailController,
                 decoration: const InputDecoration(
                   labelText: 'Correo electrónico',
+                  border: OutlineInputBorder(),
                 ),
                 validator:
                     (val) =>
@@ -123,7 +130,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Contraseña'),
+                decoration: const InputDecoration(
+                  labelText: 'Contraseña',
+                  border: OutlineInputBorder(),
+                ),
                 validator:
                     (val) =>
                         val != null && val.length < 6
@@ -136,6 +146,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Confirmar contraseña',
+                  border: OutlineInputBorder(),
                 ),
                 validator:
                     (val) =>
